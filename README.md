@@ -13,7 +13,7 @@ cd build
 cmake -DCMAKE_BUILD_TYPE=Debug ..
 make
 ```
-4. Repeat steps for TestApp
+5. Repeat steps for TestApp
 
 
 ## Windows
