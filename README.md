@@ -4,8 +4,9 @@
 # Building
 ## Linux
 1. Install cmake, make, g++/clang and SDL2
-2. Navigate to the directory containing the engine
-3. Enter below commands
+2. Open terminal
+3. Navigate to the directory containing the engine
+4. Enter below commands
 ```
 mkdir build
 cd build
