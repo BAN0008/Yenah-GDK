@@ -1,6 +1,6 @@
 #include <Yeno/Window.hpp>
 #include <Yeno/Shader.hpp>
-#include "/home/brad/Documents/Yeno-GDK/Engine/src/RenderBatch.hpp"
+#include "../../Engine/src/RenderBatch.hpp"
 
 using namespace Yeno;
 
@@ -11,7 +11,7 @@ int main(int argc, char **argv)
 	RenderBatch *batch = new RenderBatch();
 	batch->AddVertex(-0.5f, -0.5f);
 	batch->AddVertex(0.5f, -0.5f);
-	batch->AddVertex(0.5f, 0.5f);
+	batch->AddVertex(0.0f, 0.5f);
 	while (window->IsOpen()) {
 		window->ProcessEvents();
 		window->Clear();
