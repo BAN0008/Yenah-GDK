@@ -1,7 +1,11 @@
 #include <Yeno/Window.hpp>
 #include <Yeno/Log.hpp>
+#include <Yeno/Shader.hpp>
 #include "Config.hpp"
 #include <glad/glad.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <cstring>
 
 namespace Yeno
 {
@@ -17,6 +21,7 @@ namespace Yeno
 			return;
 		}
 
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 		SDL_ClearError();
 		context = SDL_GL_CreateContext(window);
 		if (context == nullptr) {
@@ -34,13 +39,25 @@ namespace Yeno
 		glGetIntegerv(GL_MAJOR_VERSION, &gl_major);
 		glGetIntegerv(GL_MAJOR_VERSION, &gl_minor);
 
-		if (gl_major >= 4 && gl_minor >= 4) {
+		GLint extension_count;
+		glGetIntegerv(GL_NUM_EXTENSIONS, &extension_count);
+		Config::use_persistent_mapping = false;
+		for (GLint i = 0; i < extension_count; i++) {
+			const char *extension_name = (const char *)glGetStringi(GL_EXTENSIONS, i);
+			if (strcmp(extension_name, "GL_ARB_buffer_storage") == 0) {
+				Config::use_persistent_mapping = true;
+			}
+		}
+		if (!Config::use_persistent_mapping) {
+			Log::Warn("Warning: Driver doesn't support persistent buffer mapping\n");
+		}
+		/*if (gl_major >= 4 && gl_minor >= 4) {
 			Config::use_persistent_mapping = true;
 		}
 		else {
 			Config::use_persistent_mapping = false;
 			Log::Warn("Warning: Driver doesn't support persistent buffer mapping\n");
-		}
+		}*/
 	}
 	Window::~Window()
 	{
@@ -57,6 +74,18 @@ namespace Yeno
 				case SDL_QUIT:
 					if (window != nullptr) SDL_DestroyWindow(window);
 					window = nullptr;
+					break;
+				case SDL_WINDOWEVENT:
+					if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
+						const int width  = event.window.data1;
+						const int height = event.window.data2;
+						glm::mat4 projection = glm::ortho(0.0f, (float)width, (float)height, 0.0f);
+						glm::mat4 view(1.0f);
+						glViewport(0, 0, width, height);
+						glBindBuffer(GL_UNIFORM_BUFFER, Shader::uniform_buffer);
+						glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), &projection[0][0]);
+						glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), &view[0][0]);
+					}
 					break;
 			}
 		}

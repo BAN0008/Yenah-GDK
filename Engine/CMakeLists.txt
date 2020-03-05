@@ -6,6 +6,7 @@ link_directories("${CMAKE_CURRENT_LIST_DIR}/vendor/SDL2/lib/x64")
 list(APPEND source "${CMAKE_CURRENT_LIST_DIR}/src/Window.cpp")
 list(APPEND source "${CMAKE_CURRENT_LIST_DIR}/src/Shader.cpp")
 list(APPEND source "${CMAKE_CURRENT_LIST_DIR}/src/RenderBatch.cpp")
+list(APPEND source "${CMAKE_CURRENT_LIST_DIR}/src/Camera.cpp")
 list(APPEND source "${CMAKE_CURRENT_LIST_DIR}/src/Log.cpp")
 list(APPEND source "${CMAKE_CURRENT_LIST_DIR}/src/Config.cpp")
 

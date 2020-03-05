@@ -1,5 +1,6 @@
 #include <Yeno/Shader.hpp>
 #include <Yeno/Log.hpp>
+#include <glm/glm.hpp>
 
 const char *default_vertex_code = R"(
 #version 330 core
@@ -7,15 +8,19 @@ layout (location = 0) in vec4 vertex;
 layout (location = 1) in vec4 colour;
 layout (location = 2) in int sampler;
 
-
 out vec4 frag_colour;
+
+layout (std140) uniform matrices
+{
+	mat4 projection;
+	mat4 view;
+};
 
 void main()
 {
 	frag_colour = colour;
-	gl_Position = vec4(vertex.xy, 0.0, 1.0);
-}
-)";
+	gl_Position = projection * view * vec4(vertex.xy, 0.0, 1.0);
+})";
 
 const char *default_fragment_code = R"(
 #version 330 core
@@ -24,12 +29,12 @@ in vec4 frag_colour;
 void main()
 {
 	gl_FragColor = frag_colour;
-}
-)";
+})";
 
 namespace Yeno
 {
 	Shader *Shader::default_shader = nullptr;
+	GLuint Shader::uniform_buffer = 0;
 
 	Shader::Shader()
 	{
@@ -38,6 +43,14 @@ namespace Yeno
 	Shader::~Shader()
 	{
 		glDeleteProgram(program_id);
+	}
+
+	void Shader::Initialize()
+	{
+		glGenBuffers(1, &uniform_buffer);
+		glBindBuffer(GL_UNIFORM_BUFFER, uniform_buffer);
+		glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::mat4) * 2, nullptr, GL_DYNAMIC_DRAW);
+		glBindBufferRange(GL_UNIFORM_BUFFER, 0, uniform_buffer, 0, sizeof(glm::mat4) * 2);
 	}
 
 	void Shader::CreateDefaultShader()
@@ -94,6 +107,9 @@ namespace Yeno
 		glDeleteShader(vertex_id);
 		glDeleteShader(fragment_id);
 		if (geometry_code != nullptr) glDeleteShader(geometry_id);
+
+		GLuint index = glGetUniformBlockIndex(new_shader->program_id, "matrices");
+		glUniformBlockBinding(new_shader->program_id, index, 0);
 
 		return new_shader;
 	}
