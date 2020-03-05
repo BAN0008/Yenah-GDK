@@ -39,6 +39,7 @@ target_link_libraries(${target} ${libraries})
 target_include_directories(${target} PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
 target_include_directories(${target} PUBLIC "${CMAKE_CURRENT_LIST_DIR}/vendor/${glad_dir}/include")
 target_include_directories(${target} PUBLIC "${CMAKE_CURRENT_LIST_DIR}/vendor/SDL2/include")
+target_include_directories(${target} PUBLIC "${CMAKE_CURRENT_LIST_DIR}/vendor/GLM")
 
 target_compile_features(${target} PUBLIC cxx_nullptr)
 

@@ -18,6 +18,7 @@ target_link_libraries(TestApp "yeno" "SDL2" "SDL2main")
 target_include_directories(TestApp PRIVATE "${CMAKE_CURRENT_LIST_DIR}/../Engine/include")
 target_include_directories(TestApp PRIVATE "${CMAKE_CURRENT_LIST_DIR}/../Engine/vendor/glad_debug/include")
 target_include_directories(TestApp PRIVATE "${CMAKE_CURRENT_LIST_DIR}/../Engine/vendor/SDL2/include")
+target_include_directories(TestApp PRIVATE "${CMAKE_CURRENT_LIST_DIR}/../Engine/vendor/GLM")
 
 set_target_properties(TestApp PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_CURRENT_BINARY_DIR}/release")
 set_target_properties(TestApp PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG   "${CMAKE_CURRENT_BINARY_DIR}/debug")
