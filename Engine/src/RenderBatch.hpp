@@ -21,7 +21,7 @@ namespace Yeno
 		void Render();
 		void Clear();
 
-		void AddVertex(float x, float y);
+		void AddVertex(float x, float y, float r, float g, float b, float a);
 	private:
 		Vertex *vertices = nullptr;
 		int vertex_count = 0;

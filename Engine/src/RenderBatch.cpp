@@ -58,10 +58,10 @@ namespace Yeno
 		vertex_count = 0;
 	}
 
-	void RenderBatch::AddVertex(float x, float y)
+	void RenderBatch::AddVertex(float x, float y, float r, float g, float b, float a)
 	{
 		if (vertices != nullptr && vertex_count < Config::batch_size) {
-			vertices[vertex_count++] = {x, y, 0.0, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0};
+			vertices[vertex_count++] = {x, y, 0.0, 0.0f, r, g, b, a, 0};
 		}
 	}
 }
