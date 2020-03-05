@@ -34,7 +34,7 @@ if (UNIX)
 	list(APPEND libraries "dl" "luajit-5.1" "m")
 endif()
 if (WIN32)
-	list(APPEND libraries "opengl32" "SDL2main" "luajit" "m")
+	list(APPEND libraries "opengl32" "SDL2main" "luajit" "lua51")
 endif()
 
 target_link_libraries(${target} ${libraries})
