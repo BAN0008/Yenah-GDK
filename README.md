@@ -8,9 +8,8 @@
 3. Navigate to the directory containing the engine
 4. Enter below commands
 ```
-mkdir build
+cmake -DCMAKE_BUILD_TYPE=Debug -B build
 cd build
-cmake -DCMAKE_BUILD_TYPE=Debug ..
 make
 ```
 5. Repeat steps for TestApp
@@ -22,10 +21,12 @@ make
 3. Navigate to the directory containing the engine
 4. Enter below commands
 ```
-mkdir build
+cmake -DCMAKE_BUILD_TYPE=Debug -G Ninja -B build
 cd build
-cmake -DCMAKE_BUILD_TYPE=Debug -G Ninja ..
 ninja
 ```
 5. Repeat steps for TestApp
-6. Copy `Engine/vendor/SDL2/lib/x64/SDL2.dll` and `Engine/build/debug/yeno.dll` to `TestApp/build/debug`
+6. Copy `Engine/vendor/SDL2/lib/x64/SDL2.dll` and `Engine/vendor/LuaJit/lib/x64/luajit.dll` and `Engine/build/debug/yeno.dll` to `TestApp/build/debug`
+
+### Alternative
+There is also a build script in TestApp that should automatically complete all the required steps of building.
