@@ -26,7 +26,3 @@ cd build
 ninja
 ```
 5. Repeat steps for TestApp
-6. Copy `Engine/vendor/SDL2/lib/x64/SDL2.dll` and `Engine/vendor/LuaJit/lib/x64/luajit.dll` and `Engine/build/debug/yeno.dll` to `TestApp/build/debug`
-
-### Alternative
-There is also a build script in TestApp that should automatically complete all the required steps of building.
