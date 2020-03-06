@@ -1,6 +1,7 @@
 #include <Yeno/Window.hpp>
 #include <Yeno/Shader.hpp>
 #include <Yeno/Camera.hpp>
+#include <Yeno/Scripting.hpp>
 #include "../../Engine/src/RenderBatch.hpp"
 
 using namespace Yeno;
@@ -11,6 +12,7 @@ int main(int argc, char **argv)
 	Shader::Initialize();
 	Shader::CreateDefaultShader();
 	RenderBatch *batch = new RenderBatch();
+	Scripting::Initialize();
 	while (window->IsOpen()) {
 		window->ProcessEvents();
 		window->Clear();
