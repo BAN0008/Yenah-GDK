@@ -1,6 +1,6 @@
 #include <Yeno/Camera.hpp>
 #include <Yeno/Shader.hpp>
-#include <gtc/matrix_transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <glad/glad.h>
 
 namespace Yeno

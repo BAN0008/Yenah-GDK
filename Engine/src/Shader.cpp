@@ -1,6 +1,6 @@
 #include <Yeno/Shader.hpp>
 #include <Yeno/Log.hpp>
-#include <glm.hpp>
+#include <glm/glm.hpp>
 
 const char *default_vertex_code = R"(
 #version 330 core

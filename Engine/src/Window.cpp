@@ -3,8 +3,8 @@
 #include <Yeno/Shader.hpp>
 #include "Config.hpp"
 #include <glad/glad.h>
-#include <glm.hpp>
-#include <gtc/matrix_transform.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <cstring>
 
 namespace Yeno
