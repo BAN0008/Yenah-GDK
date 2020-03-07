@@ -53,3 +53,10 @@ set_target_properties(${target} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${C
 set_target_properties(${target} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY_DEBUG   "${CMAKE_CURRENT_BINARY_DIR}/debug")
 set_target_properties(${target} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_CURRENT_BINARY_DIR}/release")
 set_target_properties(${target} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG   "${CMAKE_CURRENT_BINARY_DIR}/debug")
+
+if (WIN32)
+add_custom_command(TARGET yeno POST_BUILD 
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+		"$<TARGET_FILE_DIR:yeno>/yeno.dll"
+		"${CMAKE_CURRENT_LIST_DIR}/../TestApp/build/debug/yeno.dll")
+endif()
