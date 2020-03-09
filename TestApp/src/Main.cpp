@@ -9,8 +9,6 @@ using namespace Yeno;
 int main(int argc, char **argv)
 {
 	Window *window = new Window("TestApp", 1280, 720);
-	Shader::Initialize();
-	Shader::CreateDefaultShader();
 	RenderBatch *batch = new RenderBatch();
 	Scripting::Initialize();
 	while (window->IsOpen()) {

@@ -9,7 +9,7 @@ namespace Yeno
 	float rotation = 0.0f; //Rotation in radians
 	glm::vec2 scale(1.0f, 1.0f);
 
-	void UpdateMatrix()
+	void Camera::UpdateMatrix()
 	{
 		glm::mat4 view(1.0f);
 		view = glm::translate(view, {1280.0f / 2.0f, 720.0f / 2.0f, 0.0f});

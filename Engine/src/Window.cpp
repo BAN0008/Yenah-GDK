@@ -1,7 +1,8 @@
 #include <Yeno/Window.hpp>
 #include <Yeno/Log.hpp>
 #include <Yeno/Shader.hpp>
-#include "Config.hpp"
+#include <Yeno/Camera.hpp>
+#include <Yeno/Config.hpp>
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -58,6 +59,12 @@ namespace Yeno
 			Config::use_persistent_mapping = false;
 			Log::Warn("Warning: Driver doesn't support persistent buffer mapping\n");
 		}*/
+
+		Shader::Initialize();
+		Shader::CreateDefaultShader();
+		Camera::UpdateMatrix();
+
+		Window::Resize(width, height);
 	}
 	Window::~Window()
 	{
@@ -77,14 +84,7 @@ namespace Yeno
 					break;
 				case SDL_WINDOWEVENT:
 					if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
-						const int width  = event.window.data1;
-						const int height = event.window.data2;
-						glm::mat4 projection = glm::ortho(0.0f, (float)width, (float)height, 0.0f);
-						glm::mat4 view(1.0f);
-						glViewport(0, 0, width, height);
-						glBindBuffer(GL_UNIFORM_BUFFER, Shader::uniform_buffer);
-						glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), &projection[0][0]);
-						glBufferSubData(GL_UNIFORM_BUFFER, sizeof(glm::mat4), sizeof(glm::mat4), &view[0][0]);
+						Resize(event.window.data1, event.window.data2);
 					}
 					break;
 			}
@@ -104,5 +104,13 @@ namespace Yeno
 	void Window::SwapBuffer()
 	{
 		SDL_GL_SwapWindow(window);
+	}
+
+	void Window::Resize(int width, int height)
+	{
+		glm::mat4 projection = glm::ortho(0.0f, (float)width, (float)height, 0.0f);
+		glViewport(0, 0, width, height);
+		glBindBuffer(GL_UNIFORM_BUFFER, Shader::uniform_buffer);
+		glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), &projection[0][0]);
 	}
 }

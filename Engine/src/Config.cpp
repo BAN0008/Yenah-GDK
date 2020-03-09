@@ -1,4 +1,4 @@
-#include "Config.hpp"
+#include <Yeno/Config.hpp>
 
 namespace Yeno
 {
