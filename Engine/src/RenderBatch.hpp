@@ -1,5 +1,5 @@
 #pragma once
-#include "Config.hpp"
+#include <Yeno/Config.hpp>
 #include <glad/glad.h>
 
 namespace Yeno

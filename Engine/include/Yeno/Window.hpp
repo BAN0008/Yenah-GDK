@@ -17,5 +17,6 @@ namespace Yeno
 	private:
 		SDL_Window *window = nullptr;
 		SDL_GLContext context = nullptr;
+		bool open = true;
 	};
 }

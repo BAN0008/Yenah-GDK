@@ -6,5 +6,7 @@ namespace Yeno
 	{
 		extern int  batch_size;
 		extern bool use_persistent_mapping;
+		extern bool vsync;
+		extern bool antialiasing;
 	}
 }
