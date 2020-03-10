@@ -77,8 +77,14 @@ int main(int argc, char **argv)
 		batch->AddVertex((1280.0f / 2.0f) + 4.0f, (720.0f / 2.0f) + 4.0f, 0.0f, 1.0f, 0.0f, 1.0f);
 
 		ImGui::Begin("Test");
-		ImGui::Checkbox("V-SYNC", &Config::vsync);
-		ImGui::Checkbox("Anti Aliasing", &Config::antialiasing);
+		//ImGui::Checkbox("V-SYNC", &Config::vsync);
+		bool vsync = Config::GetVSync();
+		ImGui::Checkbox("V-SYNC", &vsync);
+		Config::SetVSync(vsync);
+		//ImGui::Checkbox("Anti-aliasing", &Config::antialiasing);
+		bool antialiasing = Config::GetAntialiasing();
+		ImGui::Checkbox("Anti-aliasing", &antialiasing);
+		Config::SetAntialiasing(antialiasing);
 		ImGui::End();
 
 		batch->Render();

@@ -122,6 +122,8 @@ namespace Yeno
 				glDisable(GL_MULTISAMPLE);
 			}
 		}
+		glBindBuffer(GL_ARRAY_BUFFER, 12403);
+		glBufferData(GL_ARRAY_BUFFER, 1000, nullptr, GL_STATIC_DRAW);
 	}
 
 	bool Window::IsOpen()

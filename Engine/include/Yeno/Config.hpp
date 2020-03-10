@@ -8,5 +8,10 @@ namespace Yeno
 		extern bool use_persistent_mapping;
 		extern bool vsync;
 		extern bool antialiasing;
+		
+		bool GetVSync();
+		void SetVSync(bool value);
+		bool GetAntialiasing();
+		void SetAntialiasing(bool value);
 	}
 }

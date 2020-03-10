@@ -48,6 +48,7 @@ namespace Yeno
 	{
 		glBindVertexArray(vao);
 		if (!Config::use_persistent_mapping) {
+			glBindBuffer(GL_ARRAY_BUFFER, vbo);
 			glBufferSubData(GL_ARRAY_BUFFER, 0, vertex_count * sizeof(Vertex), vertices);
 		}
 		glDrawArrays(GL_TRIANGLES, 0, vertex_count);
