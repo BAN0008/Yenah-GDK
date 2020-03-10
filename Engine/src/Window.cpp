@@ -8,10 +8,18 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <cstring>
 
+#include <imgui.h>
+#include <imgui_impl_sdl.h>
+#include <imgui_impl_opengl3.h>
+
 namespace Yeno
 {
 	Window::Window(const char *title, int width, int height)
 	{
+		SDL_Init(SDL_INIT_VIDEO);
+		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
+
 		SDL_ClearError();
 		window = SDL_CreateWindow(title,
 		                          SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
@@ -65,9 +73,23 @@ namespace Yeno
 		Camera::UpdateMatrix();
 
 		Window::Resize(width, height);
+		
+		SDL_GL_SetSwapInterval(Config::vsync * -1);
+
+		//Initialize imgui
+		ImGui::CreateContext();
+		ImGuiIO& io = ImGui::GetIO(); (void)io;
+		io.IniFilename = nullptr;
+		ImGui_ImplSDL2_InitForOpenGL(window, context);
+		ImGui_ImplOpenGL3_Init("#version 330 core");
 	}
+
 	Window::~Window()
 	{
+		ImGui_ImplOpenGL3_Shutdown();
+		ImGui_ImplSDL2_Shutdown();
+		ImGui::DestroyContext();
+
 		if (context != nullptr) SDL_GL_DeleteContext(context);
 		if (window != nullptr) SDL_DestroyWindow(window);
 		window = nullptr;
@@ -79,8 +101,7 @@ namespace Yeno
 		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
 				case SDL_QUIT:
-					if (window != nullptr) SDL_DestroyWindow(window);
-					window = nullptr;
+					open = false;
 					break;
 				case SDL_WINDOWEVENT:
 					if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
@@ -89,20 +110,38 @@ namespace Yeno
 					break;
 			}
 		}
+
+		if (SDL_GL_GetSwapInterval() != (Config::vsync * -1)) {
+			SDL_GL_SetSwapInterval(Config::vsync * -1);
+		}
+		if (glIsEnabled(GL_MULTISAMPLE) != Config::antialiasing) {
+			if (Config::antialiasing) {
+				glEnable(GL_MULTISAMPLE);
+			}
+			else {
+				glDisable(GL_MULTISAMPLE);
+			}
+		}
 	}
 
 	bool Window::IsOpen()
 	{
-		return (window != nullptr);
+		return open;
 	}
 
 	void Window::Clear()
 	{
-		glClear(GL_COLOR_BUFFER_BIT);
+		ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplSDL2_NewFrame(window);
+        ImGui::NewFrame();
+        
+        glClear(GL_COLOR_BUFFER_BIT);
 	}
 
 	void Window::SwapBuffer()
 	{
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		SDL_GL_SwapWindow(window);
 	}
 

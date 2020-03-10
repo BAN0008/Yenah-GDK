@@ -17,6 +17,7 @@ namespace Yeno
 	private:
 		SDL_Window *window = nullptr;
 		SDL_GLContext context = nullptr;
+		bool open = true;
 
 		static void Resize(int width, int height);
 	};

@@ -12,6 +12,12 @@ list(APPEND source "${CMAKE_CURRENT_LIST_DIR}/src/Log.cpp")
 list(APPEND source "${CMAKE_CURRENT_LIST_DIR}/src/Config.cpp")
 list(APPEND source "${CMAKE_CURRENT_LIST_DIR}/src/Scripting.cpp")
 
+list(APPEND source "${CMAKE_CURRENT_LIST_DIR}/vendor/imgui/src/imgui.cpp")
+list(APPEND source "${CMAKE_CURRENT_LIST_DIR}/vendor/imgui/src/imgui_draw.cpp")
+list(APPEND source "${CMAKE_CURRENT_LIST_DIR}/vendor/imgui/src/imgui_widgets.cpp")
+list(APPEND source "${CMAKE_CURRENT_LIST_DIR}/vendor/imgui/src/imgui_impl_sdl.cpp")
+list(APPEND source "${CMAKE_CURRENT_LIST_DIR}/vendor/imgui/src/imgui_impl_opengl3.cpp")
+
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
 	set(glad_dir "glad_debug")
 else()
@@ -43,6 +49,14 @@ target_include_directories(${target} PUBLIC "${CMAKE_CURRENT_LIST_DIR}/vendor/${
 target_include_directories(${target} PUBLIC "${CMAKE_CURRENT_LIST_DIR}/vendor/SDL2/include")
 target_include_directories(${target} PUBLIC "${CMAKE_CURRENT_LIST_DIR}/vendor/glm/include")
 target_include_directories(${target} PUBLIC "${CMAKE_CURRENT_LIST_DIR}/vendor/LuaJit/include")
+
+if(WIN32)
+	target_include_directories(${target} PUBLIC "${CMAKE_CURRENT_LIST_DIR}/vendor/SDL2/include")
+endif()
+if(UNIX)
+	target_include_directories(${target} PUBLIC "/usr/include/SDL2")
+endif()
+target_include_directories(${target} PUBLIC "${CMAKE_CURRENT_LIST_DIR}/vendor/imgui/include")
 
 target_compile_features(${target} PUBLIC cxx_nullptr)
 
