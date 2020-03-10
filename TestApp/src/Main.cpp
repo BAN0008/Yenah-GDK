@@ -7,6 +7,9 @@
 #include "../../Engine/src/RenderBatch.hpp"
 #include "../../Engine/vendor/imgui/include/imgui.h"
 
+#include <vector>
+#include <iostream>
+
 using namespace Yeno;
 
 int main(int argc, char **argv)
@@ -15,7 +18,12 @@ int main(int argc, char **argv)
 	RenderBatch *batch = new RenderBatch();
 	Scripting::Initialize();
 
+	auto previous_time = SDL_GetPerformanceCounter();
 	while (window->IsOpen()) {
+		auto current_time = SDL_GetPerformanceCounter();
+		float delta_time = ((float)(current_time - previous_time) / (float)SDL_GetPerformanceFrequency()) * 1000.0f;
+		previous_time = current_time;
+
 		window->ProcessEvents();
 		window->Clear();
 
@@ -76,7 +84,7 @@ int main(int argc, char **argv)
 		batch->AddVertex((1280.0f / 2.0f) - 4.0f, (720.0f / 2.0f) + 4.0f, 0.0f, 1.0f, 0.0f, 1.0f);
 		batch->AddVertex((1280.0f / 2.0f) + 4.0f, (720.0f / 2.0f) + 4.0f, 0.0f, 1.0f, 0.0f, 1.0f);
 
-		ImGui::Begin("Test");
+		ImGui::Begin("Profiler");
 		//ImGui::Checkbox("V-SYNC", &Config::vsync);
 		bool vsync = Config::GetVSync();
 		ImGui::Checkbox("V-SYNC", &vsync);
@@ -85,6 +93,16 @@ int main(int argc, char **argv)
 		bool antialiasing = Config::GetAntialiasing();
 		ImGui::Checkbox("Anti-aliasing", &antialiasing);
 		Config::SetAntialiasing(antialiasing);
+
+		//Frame rate counter
+		static std::vector<float> delta_times;
+		delta_times.insert((delta_times.begin() + delta_times.size()), delta_time);
+		if (delta_times.size() > 500) {
+			delta_times.erase(delta_times.begin());
+		}
+		//ImGui::PlotLines(label, values, value_count, offset, overlay_text, scale_min, scale_max, graphsize, stride);
+		ImGui::PlotLines("Deltatime", delta_times.data(), delta_times.size(), 0, "(ms)", 0.0f, 33.2f, {256, 64});
+
 		ImGui::End();
 
 		batch->Render();
