@@ -8,12 +8,10 @@
 3. Navigate to the directory containing the engine
 4. Enter below commands
 ```
-cmake -DCMAKE_BUILD_TYPE=Debug -B build
+cmake -DCMAKE_BUILD_TYPE=Release -B build
 cd build
 make
 ```
-5. Repeat steps for TestApp
-
 
 ## Windows
 1. Install Visual Studio with the C++ Desktop Development Workload
@@ -21,8 +19,7 @@ make
 3. Navigate to the directory containing the engine
 4. Enter below commands
 ```
-cmake -DCMAKE_BUILD_TYPE=Debug -G Ninja -B build
+cmake -DCMAKE_BUILD_TYPE=Release -G Ninja -B build
 cd build
 ninja
 ```
-5. Repeat steps for TestApp

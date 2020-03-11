@@ -1,7 +1,7 @@
 #pragma once
 #include <glad/glad.h>
 
-namespace Yeno
+namespace Yenah
 {
 	class Shader
 	{
@@ -9,7 +9,6 @@ namespace Yeno
 		static GLuint uniform_buffer;
 
 		static void Initialize();
-		static void CreateDefaultShader();
 		static Shader *CreateFromStrings(const char *vertex_code, const char *fragment_code, const char *geometry_code = nullptr);
 		~Shader();
 

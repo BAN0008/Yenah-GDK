@@ -1,9 +1,10 @@
-#include <Yeno/Shader.hpp>
-#include <Yeno/Log.hpp>
+#include "Shader.hpp"
+#include "Log.hpp"
 #include <glm/glm.hpp>
 
 const char *default_vertex_code = R"(
-#version 330 core
+#version 150 core
+#extension GL_ARB_explicit_attrib_location : enable
 layout (location = 0) in vec4 vertex;
 layout (location = 1) in vec4 colour;
 layout (location = 2) in int sampler;
@@ -23,15 +24,16 @@ void main()
 })";
 
 const char *default_fragment_code = R"(
-#version 330 core
+#version 150 core
 in vec4 frag_colour;
+out vec4 out_frag_colour;
 
 void main()
 {
-	gl_FragColor = frag_colour;
+	out_frag_colour = frag_colour;
 })";
 
-namespace Yeno
+namespace Yenah
 {
 	Shader *Shader::default_shader = nullptr;
 	GLuint Shader::uniform_buffer = 0;
@@ -51,10 +53,7 @@ namespace Yeno
 		glBindBuffer(GL_UNIFORM_BUFFER, uniform_buffer);
 		glBufferData(GL_UNIFORM_BUFFER, sizeof(glm::mat4) * 2, nullptr, GL_DYNAMIC_DRAW);
 		glBindBufferRange(GL_UNIFORM_BUFFER, 0, uniform_buffer, 0, sizeof(glm::mat4) * 2);
-	}
 
-	void Shader::CreateDefaultShader()
-	{
 		default_shader = CreateFromStrings(default_vertex_code, default_fragment_code);
 		default_shader->Bind();
 	}
@@ -71,7 +70,7 @@ namespace Yeno
 		glGetShaderiv(vertex_id, GL_COMPILE_STATUS, &success);
 		if (!success) {
 			glGetShaderInfoLog(vertex_id, 4096, nullptr, info_log);
-			Log::Error("Error: Failed to compile vertex shader: %s\n", info_log);
+			Log::Error("Failed to compile vertex shader: %s", info_log);
 		}
 
 		GLuint fragment_id = glCreateShader(GL_FRAGMENT_SHADER);
@@ -80,7 +79,7 @@ namespace Yeno
 		glGetShaderiv(fragment_id, GL_COMPILE_STATUS, &success);
 		if (!success) {
 			glGetShaderInfoLog(fragment_id, 4096, nullptr, info_log);
-			Log::Error("Error: Failed to compile fragment shader: %s\n", info_log);
+			Log::Error("Failed to compile fragment shader: %s", info_log);
 		}
 
 		GLuint geometry_id = 0;
@@ -91,7 +90,7 @@ namespace Yeno
 			glGetShaderiv(geometry_id, GL_COMPILE_STATUS, &success);
 			if (!success) {
 				glGetShaderInfoLog(geometry_id, 4096, nullptr, info_log);
-				Log::Error("Error: Failed to compile geometry shader: %s\n", info_log);
+				Log::Error("Failed to compile geometry shader: %s", info_log);
 			}
 		}
 
@@ -102,7 +101,7 @@ namespace Yeno
 		glGetProgramiv(new_shader->program_id, GL_LINK_STATUS, &success);
 		if (!success) {
 			glGetProgramInfoLog(new_shader->program_id, 4096, nullptr, info_log);
-			Log::Error("Error: Failed to link shader program: %s\n", info_log);
+			Log::Error("Failed to link shader program: %s", info_log);
 		}
 		glDeleteShader(vertex_id);
 		glDeleteShader(fragment_id);

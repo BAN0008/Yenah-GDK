@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Yeno
+namespace Yenah
 {
 	namespace Log
 	{
