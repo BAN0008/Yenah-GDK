@@ -3,11 +3,6 @@
 
 using namespace Yenah;
 
-#ifdef WIN32
-	#error Win32 entry point not yet written
-#endif
-
-#ifdef UNIX
 int main(int argc, const char *argv[])
 {
 	// TODO: Run config.lua to get parameters for Window::Create()
@@ -17,7 +12,6 @@ int main(int argc, const char *argv[])
 	Window::Destroy();
 	return 0;
 }
-#endif
 
 #ifndef WIN32
 	#ifndef UNIX

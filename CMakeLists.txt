@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.0.0 FATAL_ERROR)
 project(Yenah)
 
+link_directories("vendor/SDL2/lib/x64")
+link_directories("vendor/LuaJit/lib/x64")
+
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	set(glad_dir "glad_debug")
 else()
@@ -31,12 +34,22 @@ if(UNIX)
 endif()
 if(WIN32)
 	target_include_directories(Yenah PRIVATE "vendor/SDL2/include")
-	target_compile_definitions(Yenah PRIVATE WIN32)
+	target_compile_definitions(Yenah PRIVATE WIN32 _CRT_SECURE_NO_WARNINGS)
 
-	target_link_libraries(Yenah "opengl32" "luajit" "lua51")
+	target_link_libraries(Yenah "SDL2main" "opengl32" "luajit" "lua51")
 endif()
 
 target_link_libraries(Yenah "SDL2")
 
 set_target_properties(Yenah PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG   "${CMAKE_CURRENT_BINARY_DIR}/debug")
 set_target_properties(Yenah PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_CURRENT_BINARY_DIR}/release")
+
+if (WIN32)
+	add_custom_command(TARGET Yenah POST_BUILD 
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+			"${CMAKE_CURRENT_LIST_DIR}/vendor/SDL2/lib/x64/SDL2.dll"
+			$<TARGET_FILE_DIR:Yenah>
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different 
+			"${CMAKE_CURRENT_LIST_DIR}/vendor/LuaJit/lib/x64/lua51.dll"
+			$<TARGET_FILE_DIR:Yenah>)
+endif()

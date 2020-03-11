@@ -11,7 +11,7 @@ namespace Yenah
 		char *buffer = (char *)malloc(strlen(message) + strlen("Information: \n"));
 		sprintf(buffer, "Information: %s\n", message);
 		va_list args;
-		va_start(args, buffer);
+		va_start(args, message);
 		vprintf(buffer, args);
 		va_end(args);
 	}
@@ -21,7 +21,7 @@ namespace Yenah
 		char *buffer = (char *)malloc(strlen(message) + strlen("Warning: \n"));
 		sprintf(buffer, "Warning: %s\n", message);
 		va_list args;
-		va_start(args, buffer);
+		va_start(args, message);
 		vprintf(buffer, args);
 		va_end(args);
 	}
@@ -31,7 +31,7 @@ namespace Yenah
 		char *buffer = (char *)malloc(strlen(message) + strlen("Error: \n"));
 		sprintf(buffer, "Error: %s\n", message);
 		va_list args;
-		va_start(args, buffer);
+		va_start(args, message);
 		vprintf(buffer, args);
 		va_end(args);
 	}
@@ -41,7 +41,7 @@ namespace Yenah
 		char *buffer = (char *)malloc(strlen(message) + strlen("Fatal Error: \n"));
 		sprintf(buffer, "Fatal Error: %s\n", message);
 		va_list args;
-		va_start(args, buffer);
+		va_start(args, message);
 		vprintf(buffer, args);
 		va_end(args);
 	}	
