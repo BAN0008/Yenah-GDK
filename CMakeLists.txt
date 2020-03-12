@@ -16,6 +16,7 @@ list(APPEND sources "src/Window.cpp")
 list(APPEND sources "src/Renderer.cpp")
 list(APPEND sources "src/Shader.cpp")
 list(APPEND sources "src/Log.cpp")
+list(APPEND sources "src/Lua.cpp")
 
 list(APPEND sources "vendor/${glad_dir}/src/glad.c")
 

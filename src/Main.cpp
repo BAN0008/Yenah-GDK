@@ -1,15 +1,20 @@
 #include "Window.hpp"
 #include "Renderer.hpp"
+#include "Lua.hpp"
 
 using namespace Yenah;
 
 int main(int argc, const char *argv[])
 {
-	// TODO: Run config.lua to get parameters for Window::Create()
-	Window::Create("Test", 1280, 720);
+	Lua::Initialize();
+	Window::Create(
+			Lua::EngineConfig::window.title, 
+			Lua::EngineConfig::window.width,
+			Lua::EngineConfig::window.height);
 	Renderer::Initialize();
 	Renderer::Cleanup();
 	Window::Destroy();
+	Lua::Cleanup();
 	return 0;
 }
 
