@@ -3,67 +3,72 @@
 
 #include <cstring>
 
-namespace Yenah::Lua
+namespace Yenah
 {
-	lua_State *gL;
-	struct EngineConfig::window_c EngineConfig::window;
-	void ReadConfig()
+	namespace Lua
 	{
-		// Create our engine configuration tables
-		lua_newtable(gL);
-		lua_setglobal(gL, "window");
-		bool useDefault = false;
-		if (luaL_dofile(gL, "config.lua"))
+		lua_State *gL;
+		EngineConfig::window_c EngineConfig::window;
+
+		bool Initialize()
 		{
-			useDefault = true;
-			Log::Error("problem loading and calling config.lua\n");
+			// Create a new Lua State and open the STD library
+			if ((gL = luaL_newstate()) == NULL)
+			{
+				Log::Fatal("Unable to create a Lua State");
+				return false;
+			}
+			luaL_openlibs(gL);
+
+			return true;
 		}
-		// Zero out our config
-		EngineConfig::window = {0, 0, nullptr, nullptr};
 
-		// Set our engine configuration values
-		lua_getglobal(gL, "window");
-		lua_pushnil(gL);
-		while(lua_next(gL, -2) != 0)
+		void Cleanup()
 		{
-			if (!strcmp(lua_tostring(gL, -2), "width"))
-				EngineConfig::window.width = lua_tonumber(gL, -1);
-			else if (!strcmp(lua_tostring(gL, -2), "height"))
-				EngineConfig::window.height = lua_tonumber(gL, -1);
-			else if (!strcmp(lua_tostring(gL, -2), "icon"))
-				EngineConfig::window.icon = (char*)lua_tostring(gL, -1);
-			else if (!strcmp(lua_tostring(gL, -2), "title"))
-				EngineConfig::window.title = (char*)lua_tostring(gL, -1);
+			lua_close(gL);
+		}
 
+		void ReadConfig()
+		{
+			EngineConfig::window = {1280, 720, "Yenah Engine", nullptr};
+
+			// Create engine configuration tables
+			lua_newtable(gL);
+			lua_setglobal(gL, "window");
+
+			// Read configuration from config.lua
+			if (luaL_dofile(gL, "config.lua"))
+			{
+				Log::Error("Failed to execute config.lua");
+				Log::Error(lua_tostring(gL, -1));
+				lua_pop(gL, 1);
+				return;
+			}
+
+			lua_getglobal(gL, "window");
+
+			lua_getfield(gL, -1, "title");
+			if (lua_isstring(gL, -1)) EngineConfig::window.title = (char *)lua_tostring(gL, -1);
 			lua_pop(gL, 1);
-		}
-		if (EngineConfig::window.width == 0 || EngineConfig::window.height == 0)
-		{
-			EngineConfig::window.width = 800;
-			EngineConfig::window.height = 600;
-		}
-		if (EngineConfig::window.title == nullptr)
-			EngineConfig::window.title = (char*)"Yenah Game Engine";
 
-	}
+			lua_getfield(gL, -1, "width");
+			if (lua_isnumber(gL, -1)) EngineConfig::window.width = lua_tointeger(gL, -1);
+			lua_pop(gL, 1);
 
-	bool Initialize()
-	{
-		// Create a new Lua State and open the STD library
-		if ((gL = luaL_newstate()) == NULL)
-		{
-			Log::Fatal("unabled to create a Lua State\n");
-			return false;
+			lua_getfield(gL, -1, "height");
+			if (lua_isnumber(gL, -1)) EngineConfig::window.height = lua_tointeger(gL, -1);
+			lua_pop(gL, 1);
+
+			lua_getfield(gL, -1, "icon");
+			if (lua_isstring(gL, -1)) EngineConfig::window.icon = (char *)lua_tostring(gL, -1);
+			lua_pop(gL, 1);
+
+			lua_pop(gL, 1); // Pop table
+
+			//Log::Info("Window Title: %s", EngineConfig::window.title);
+			//Log::Info("Window Width: %d", EngineConfig::window.width);
+			//Log::Info("Window Height: %d", EngineConfig::window.height);
+			//Log::Info("Window Icon: %s", EngineConfig::window.icon);
 		}
-		luaL_openlibs(gL);
-		
-		// Read our config.lua
-		ReadConfig();
-		return true;
-	}
-
-	void Cleanup()
-	{
-		lua_close(gL);
 	}
 }

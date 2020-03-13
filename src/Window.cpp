@@ -13,9 +13,10 @@ namespace Yenah
 			SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 			SDL_ClearError();
 			window = SDL_CreateWindow(title,
-			                          SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-			                          width, height,
-			                          SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+				SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+				width, height,
+				SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+
 			if (window == nullptr) {
 				Log::Fatal("Failed to create window: %s", SDL_GetError());
 				return false;

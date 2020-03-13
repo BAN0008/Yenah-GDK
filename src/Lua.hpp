@@ -5,7 +5,7 @@ extern "C" {
 	#include <lualib.h>
 	#include <lauxlib.h>
 }
-#include <lua.hpp>
+//#include <lua.hpp>
 
 namespace Yenah 
 {
@@ -14,6 +14,7 @@ namespace Yenah
 		extern lua_State *gL;
 
 		bool Initialize();
+		void ReadConfig();
 		void PopulateEngineCalls();
 		void Cleanup();
 
