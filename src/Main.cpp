@@ -2,7 +2,13 @@
 #include "Renderer.hpp"
 #include "Log.hpp"
 #include "Lua.hpp"
-#include <unistd.h>
+
+#ifdef WIN32
+	#include <direct.h>
+#endif
+#ifdef UNIX
+	#include <unistd.h>
+#endif
 
 using namespace Yenah;
 
