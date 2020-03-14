@@ -23,6 +23,7 @@ int main(int argc, const char *argv[])
 		return 1;
 	}
 
+	// Start up LuaJit and read the engine config
 	Lua::Initialize();
 	Lua::ReadConfig();
 
@@ -32,10 +33,13 @@ int main(int argc, const char *argv[])
 		Lua::EngineConfig::window.height);
 
 	Renderer::Initialize();
+	Lua::Start();
 
 	while (true) {
 		//Window::ProcessEvents();
+		Lua::UpdateObjects(69.0);
 		//Window::SwapBuffers();
+		Lua::DrawObjects();
 	}
 
 	Renderer::Cleanup();

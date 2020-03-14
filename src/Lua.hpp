@@ -4,8 +4,8 @@ extern "C" {
 	#include <lua.h>
 	#include <lualib.h>
 	#include <lauxlib.h>
+	#include <luajit.h>
 }
-//#include <lua.hpp>
 
 namespace Yenah 
 {
@@ -15,7 +15,11 @@ namespace Yenah
 
 		bool Initialize();
 		void ReadConfig();
-		void PopulateEngineCalls();
+		void Start();
+
+		void UpdateObjects(double dt);
+		void DrawObjects();
+
 		void Cleanup();
 
 		namespace EngineConfig

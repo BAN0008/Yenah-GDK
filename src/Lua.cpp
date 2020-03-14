@@ -1,5 +1,6 @@
 #include "Lua.hpp"
 #include "Log.hpp"
+#include "../build/lua/lua_ffi.h"
 
 #include <cstring>
 
@@ -23,14 +24,9 @@ namespace Yenah
 			return true;
 		}
 
-		void Cleanup()
-		{
-			lua_close(gL);
-		}
-
 		void ReadConfig()
 		{
-			EngineConfig::window = {1280, 720, "Yenah Engine", nullptr};
+			EngineConfig::window = {1280, 720, (char*)"Yenah Engine", nullptr};
 
 			// Create engine configuration tables
 			lua_newtable(gL);
@@ -69,6 +65,69 @@ namespace Yenah
 			//Log::Info("Window Width: %d", EngineConfig::window.width);
 			//Log::Info("Window Height: %d", EngineConfig::window.height);
 			//Log::Info("Window Icon: %s", EngineConfig::window.icon);
+		}
+
+		void Start()
+		{
+			lua_newtable(gL);
+			lua_setglobal(gL, "yenah");
+
+			// Load our FFI bindings
+			if (luaL_loadstring(gL, lua_ffi_code) || lua_pcall(gL, 0, 0, 0))
+			{
+				Log::Fatal("Failed to execute internal ffi.lua");
+				Log::Fatal(lua_tostring(gL, -1));
+				lua_pop(gL, 1);
+				return;
+			}
+
+			// Load yenah.lua
+			if (luaL_dofile(gL, "yenah.lua"))
+			{
+				Log::Fatal("Failed to execute yenah.lua");
+				Log::Fatal(lua_tostring(gL, -1));
+				lua_pop(gL, 1);
+				return;
+			}
+
+			lua_getglobal(gL, "yenah");
+
+			// Call yenah.start
+			lua_getfield(gL, -1, "start");
+			if (lua_pcall(gL, 0, 0, 0))
+			{
+				Log::Error("Failed to run yenah.start()");
+				Log::Error(lua_tostring(gL, -1));
+				lua_pop(gL, 1);
+			}
+		}
+
+		void UpdateObjects(double dt)
+		{
+			lua_getfield(gL, -1, "update");
+			lua_pushnumber(gL, dt);
+			if (lua_pcall(gL, 1, 0, 0))
+			{
+				Log::Fatal("Failed to run yenah.update()");
+				Log::Fatal(lua_tostring(gL, -1));
+				lua_pop(gL, 1);
+			}
+		}
+
+		void DrawObjects()
+		{
+			lua_getfield(gL, -1, "draw");
+			if (lua_pcall(gL, 0, 0, 0))
+			{
+				Log::Fatal("Failed to run yenah.draw()");
+				Log::Fatal(lua_tostring(gL, -1));
+				lua_pop(gL, 1);
+			}
+		}
+
+		void Cleanup()
+		{
+			lua_close(gL);
 		}
 	}
 }
