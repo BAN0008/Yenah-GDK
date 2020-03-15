@@ -10,19 +10,21 @@ ffi.cdef[[
 ]]
 
 local Test = {}
+
+function Test:getX()
+	return ffi.C.Test_getX(self.raw)
+end
+
+function Test:setX(x)
+	ffi.C.Test_setX(self.raw, x)
+end
+
 Test = setmetatable({}, {
+	__index = Test,
 	__call = function(_,x)
 		local self = {raw = ffi.C.Test_new(x)}
 		ffi.gc(self.raw, ffi.C.Test_delete)
 		return setmetatable(self, {__index = Test})
 	end})
-
-function Test.getX(self)
-	return ffi.C.Test_getX(self.raw)
-end
-
-function Test.setX(self,x)
-	ffi.C.Test_setX(self.raw, x)
-end
 
 yenah.Test = Test

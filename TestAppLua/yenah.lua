@@ -4,11 +4,10 @@ function yenah.start()
 	local p = Player(4,7)
 	p:state()
 
-	-- if you can get this to work right, the god damn
-	--local t = setmetatable(yenah.Test(420), {__index = yenah.Test})
-	--print(t:getX())
 	local t = yenah.Test(420)
-	print(yenah.Test.getX(t))
+	print(t:getX())
+	t:setX(69)
+	print(t:getX())
 	
 end
 
