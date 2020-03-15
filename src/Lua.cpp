@@ -1,6 +1,6 @@
 #include "Lua.hpp"
 #include "Log.hpp"
-#include "../build/lua/lua_ffi.h"
+#include <lua_ffi.h>
 
 #include <cstring>
 
