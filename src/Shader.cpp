@@ -7,7 +7,7 @@ const char *default_vertex_code = R"(
 #extension GL_ARB_explicit_attrib_location : enable
 layout (location = 0) in vec4 vertex;
 layout (location = 1) in vec4 colour;
-layout (location = 2) in int sampler;
+//layout (location = 2) in int sampler;
 
 out vec4 frag_colour;
 
@@ -20,7 +20,9 @@ layout (std140) uniform matrices
 void main()
 {
 	frag_colour = colour;
-	gl_Position = projection * view * vec4(vertex.xy, 0.0, 1.0);
+	//gl_Position = projection * view * vec4(vertex.xy, 0.0, 1.0);
+	gl_Position = projection * vec4(vertex.xy, 0.0, 1.0);
+	//gl_Position = vec4(vertex.xy, 0.0, 1.0);
 })";
 
 const char *default_fragment_code = R"(
@@ -36,7 +38,7 @@ void main()
 namespace Yenah
 {
 	Shader *Shader::default_shader = nullptr;
-	GLuint Shader::uniform_buffer = 0;
+	GLuint  Shader::uniform_buffer = 0;
 
 	Shader::Shader()
 	{
@@ -56,6 +58,16 @@ namespace Yenah
 
 		default_shader = CreateFromStrings(default_vertex_code, default_fragment_code);
 		default_shader->Bind();
+	}
+
+	void Shader::Cleanup()
+	{
+		if (default_shader != nullptr) {
+			delete default_shader;
+			default_shader = nullptr;
+		}
+
+		glDeleteBuffers(1, &uniform_buffer);
 	}
 
 	Shader *Shader::CreateFromStrings(const char *vertex_code, const char *fragment_code, const char *geometry_code)
