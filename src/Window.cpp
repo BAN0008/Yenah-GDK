@@ -1,4 +1,4 @@
-#include <SDL.h>
+#include "Window.hpp"
 #include "Log.hpp"
 #include "Shader.hpp"
 #include <glad/glad.h>

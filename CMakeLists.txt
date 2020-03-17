@@ -21,6 +21,12 @@ list(APPEND sources "src/Lua.cpp")
 
 list(APPEND sources "vendor/${glad_dir}/src/glad.c")
 
+list(APPEND sources "vendor/imgui/src/imgui.cpp")
+list(APPEND sources "vendor/imgui/src/imgui_draw.cpp")
+list(APPEND sources "vendor/imgui/src/imgui_widgets.cpp")
+list(APPEND sources "vendor/imgui/src/imgui_impl_opengl3.cpp")
+list(APPEND sources "vendor/imgui/src/imgui_impl_sdl.cpp")
+
 add_executable(Yenah ${sources})
 
 target_include_directories(Yenah PRIVATE "vendor/${glad_dir}/include")

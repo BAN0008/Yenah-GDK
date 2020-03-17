@@ -3,6 +3,7 @@
 #include "Log.hpp"
 #include "Lua.hpp"
 #include <SDL.h>
+#include <imgui.h>
 
 #ifdef WIN32
 	#include <direct.h>
@@ -51,6 +52,13 @@ int main(int argc, const char *argv[])
 				Renderer::DrawQuad({x * 16.0f, y * 16.0f}, {8.0f, 8.0f}, {1.0f, 0.0f, 0.0f, 1.0f});
 			}
 		}
+
+		ImGui::Begin("Profiler");
+		ImGui::Text("dt: %f", delta_time);
+		bool vsync = Renderer::GetVSync();
+		ImGui::Checkbox("VSYNC", &vsync);
+		Renderer::SetVSync(vsync);
+		ImGui::End();
 
 		// Render frame
 		Renderer::RenderFrame();
