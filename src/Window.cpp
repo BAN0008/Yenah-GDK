@@ -33,7 +33,6 @@ namespace Yenah
 				return false;
 			}
 			SDL_GL_MakeCurrent(window, context);
-			SDL_GL_SetSwapInterval(0); // Disable VSYNC
 			return true;
 		}
 

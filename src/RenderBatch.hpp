@@ -9,19 +9,14 @@ namespace Yenah
 		float r, g, b, a;
 	};
 
-	class RenderBatch
+	namespace RenderBatch
 	{
-	public:
-		RenderBatch();
-		~RenderBatch();
+		void Initialize();
+		void Cleanup();
 
-		void AddVertex(float x, float y, float r, float g, float b, float a);
+		void AddVertex(Vertex *vertex);
 
-		void Clear();
-		void Render();
-	private:
-		Vertex *vertices;
-		unsigned long vertex_count = 0;
-		GLuint vao = 0, vbo = 0;
+		unsigned int GetVertexCount();
+		void Flush();
 	};
 }

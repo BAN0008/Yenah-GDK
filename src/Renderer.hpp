@@ -1,9 +1,9 @@
 #pragma once
+#include "Texture.hpp"
 #include <glm/glm.hpp>
 
 namespace Yenah
 {
-	typedef void Texture; // TODO: Create texture class
 	namespace Renderer
 	{
 		bool Initialize();

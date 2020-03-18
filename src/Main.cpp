@@ -2,6 +2,7 @@
 #include "Renderer.hpp"
 #include "Log.hpp"
 #include "Lua.hpp"
+#include "Texture.hpp"
 #include <SDL.h>
 #include <imgui.h>
 
@@ -35,6 +36,9 @@ int main(int argc, const char *argv[])
 
 	Renderer::Initialize();
 
+	Texture *texture1 = new Texture("res/test.png");
+	Texture *texture2 = new Texture("res/clover.png");
+
 	bool running = true;
 	unsigned long previous_time = SDL_GetPerformanceCounter();
 	while (running) {
@@ -47,9 +51,16 @@ int main(int argc, const char *argv[])
 		running = Window::ProcessEvents();
 
 		// Draw quads
-		for (int x = 0; x < 80; x++) {
-			for (int y = 0; y < 45; y++) {
-				Renderer::DrawQuad({x * 16.0f, y * 16.0f}, {8.0f, 8.0f}, {1.0f, 0.0f, 0.0f, 1.0f});
+		/*for (int x = 0; x < (1920 / 128) + 1; x++) {
+			for (int y = 0; y < (1080 / 64) + 1; y++) {
+				Renderer::DrawQuad({x * 128.0f, y * 64.0f}, {64.0f, 64.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, 0.0f, 0, texture1);
+				Renderer::DrawQuad({(x * 128.0f) + 64.0f, y * 64.0f}, {64.0f, 64.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, 0.0f, 0, texture2);
+			}
+		}*/
+		for (int x = 0; x < (1920 / 32) + 1; x++) {
+			for (int y = 0; y < (1080 / 16) + 1; y++) {
+				Renderer::DrawQuad({x * 32.0f,           y * 16.0f}, {16.0f, 16.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, 0.0f, 0, texture1);
+				Renderer::DrawQuad({(x * 32.0f) + 16.0f, y * 16.0f}, {16.0f, 16.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, 0.0f, 0, texture2);
 			}
 		}
 
@@ -64,6 +75,9 @@ int main(int argc, const char *argv[])
 		Renderer::RenderFrame();
 		Window::SwapBuffers();
 	}
+
+	delete texture1;
+	delete texture2;
 
 	Renderer::Cleanup();
 	Window::Destroy();

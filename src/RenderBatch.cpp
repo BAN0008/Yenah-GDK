@@ -4,50 +4,59 @@
 
 namespace Yenah
 {
-	RenderBatch::RenderBatch()
+	namespace RenderBatch
 	{
-		vertices = (Vertex *)malloc(sizeof(Vertex) * BATCH_SIZE);
+		Vertex *vertices = nullptr;
+		unsigned long vertex_count = 0;
+		GLuint vao = 0, vbo = 0;
 
-		glGenVertexArrays(1, &vao);
-		glBindVertexArray(vao);
-		glGenBuffers(1, &vbo);
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBufferData(GL_ARRAY_BUFFER, BATCH_SIZE * sizeof(Vertex), nullptr, GL_DYNAMIC_DRAW);
+		void Initialize()
+		{
+			vertices = (Vertex *)malloc(sizeof(Vertex) * BATCH_SIZE);
 
-		glEnableVertexAttribArray(0); // Vertex position / Texture coordinate
-		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)0);
+			glGenVertexArrays(1, &vao);
+			glBindVertexArray(vao);
+			glGenBuffers(1, &vbo);
+			glBindBuffer(GL_ARRAY_BUFFER, vbo);
+			glBufferData(GL_ARRAY_BUFFER, BATCH_SIZE * sizeof(Vertex), nullptr, GL_DYNAMIC_DRAW);
 
-		glEnableVertexAttribArray(1); // Vertex colour
-		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)(4 * sizeof(float)));
+			glEnableVertexAttribArray(0); // Vertex position / Texture coordinate
+			glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)0);
 
-		glBindVertexArray(0);
-	}
+			glEnableVertexAttribArray(1); // Vertex colour
+			glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)(4 * sizeof(float)));
 
-	RenderBatch::~RenderBatch()
-	{
-		glDeleteBuffers(1, &vbo);
-		glDeleteVertexArrays(1, &vao);
-		vertex_count = 0;
-		free(vertices);
-	}
-
-	void RenderBatch::AddVertex(float x, float y, float r, float g, float b, float a)
-	{
-		if (vertex_count < BATCH_SIZE) {
-			vertices[vertex_count++] = {x, y, 0.0f, 0.0f, r, g, b, a};
+			glBindVertexArray(0);
 		}
-	}
 
-	void RenderBatch::Clear()
-	{
-		vertex_count = 0;
-	}
+		void Cleanup()
+		{
+			glDeleteBuffers(1, &vbo);
+			glDeleteVertexArrays(1, &vao);
+			vertex_count = 0;
+			free(vertices);
+		}
 
-	void RenderBatch::Render()
-	{
-		glBindVertexArray(vao);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, vertex_count * sizeof(Vertex), vertices);
-		glDrawArrays(GL_TRIANGLES, 0, vertex_count);
-		glBindVertexArray(0);
+		void AddVertex(Vertex *vertex)
+		{
+			if (vertex_count < BATCH_SIZE) {
+				vertices[vertex_count++] = *vertex;
+			}
+		}
+
+		unsigned int GetVertexCount()
+		{
+			return vertex_count;
+		}
+
+		void Flush()
+		{
+			glBindVertexArray(vao);
+			glBufferSubData(GL_ARRAY_BUFFER, 0, vertex_count * sizeof(Vertex), vertices);
+			glDrawArrays(GL_TRIANGLES, 0, vertex_count);
+			glBindVertexArray(0);
+
+			vertex_count = 0;
+		}
 	}
 }
