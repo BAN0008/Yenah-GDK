@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.0 FATAL_ERROR)
-project(Yenah)
+project(Yeno)
 
 link_directories("vendor/SDL2/lib/x64")
 link_directories("vendor/LuaJit/lib/x64")
@@ -30,41 +30,41 @@ list(APPEND sources "vendor/imgui/src/imgui_widgets.cpp")
 list(APPEND sources "vendor/imgui/src/imgui_impl_opengl3.cpp")
 list(APPEND sources "vendor/imgui/src/imgui_impl_sdl.cpp")
 
-add_executable(Yenah ${sources})
+add_executable(Yeno ${sources})
 
-target_include_directories(Yenah PRIVATE "vendor/${glad_dir}/include")
-target_include_directories(Yenah PRIVATE "vendor/glm/include")
-target_include_directories(Yenah PRIVATE "vendor/LuaJit/include")
-target_include_directories(Yenah PRIVATE "vendor/imgui/include")
-target_include_directories(Yenah PRIVATE "vendor/stb_image/include")
+target_include_directories(Yeno PRIVATE "vendor/${glad_dir}/include")
+target_include_directories(Yeno PRIVATE "vendor/glm/include")
+target_include_directories(Yeno PRIVATE "vendor/LuaJit/include")
+target_include_directories(Yeno PRIVATE "vendor/imgui/include")
+target_include_directories(Yeno PRIVATE "vendor/stb_image/include")
 
 if(UNIX)
-	target_include_directories(Yenah PRIVATE "/usr/include/SDL2")
-	target_compile_definitions(Yenah PRIVATE UNIX)
+	target_include_directories(Yeno PRIVATE "/usr/include/SDL2")
+	target_compile_definitions(Yeno PRIVATE UNIX)
 
-	target_link_libraries(Yenah "dl" "luajit-5.1" "m" "stdc++")
+	target_link_libraries(Yeno "dl" "luajit-5.1" "m" "stdc++")
 endif()
 if(WIN32)
-	target_include_directories(Yenah PRIVATE "vendor/SDL2/include")
-	target_compile_definitions(Yenah PRIVATE WIN32 _CRT_SECURE_NO_WARNINGS)
+	target_include_directories(Yeno PRIVATE "vendor/SDL2/include")
+	target_compile_definitions(Yeno PRIVATE WIN32 _CRT_SECURE_NO_WARNINGS)
 
-	target_link_libraries(Yenah "SDL2main" "opengl32" "luajit" "lua51")
+	target_link_libraries(Yeno "SDL2main" "opengl32" "luajit" "lua51")
 endif()
 
-target_link_libraries(Yenah "SDL2")
+target_link_libraries(Yeno "SDL2")
 
-#target_compile_options(Yenah PRIVATE "-O3")
-target_compile_features(Yenah PRIVATE cxx_nullptr)
+#target_compile_options(Yeno PRIVATE "-O3")
+target_compile_features(Yeno PRIVATE cxx_nullptr)
 
-set_target_properties(Yenah PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG   "${CMAKE_CURRENT_BINARY_DIR}/debug")
-set_target_properties(Yenah PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_CURRENT_BINARY_DIR}/release")
+set_target_properties(Yeno PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG   "${CMAKE_CURRENT_BINARY_DIR}/debug")
+set_target_properties(Yeno PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_CURRENT_BINARY_DIR}/release")
 
 if (WIN32)
-	add_custom_command(TARGET Yenah POST_BUILD 
+	add_custom_command(TARGET Yeno POST_BUILD 
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different 
 			"${CMAKE_CURRENT_LIST_DIR}/vendor/SDL2/lib/x64/SDL2.dll"
-			$<TARGET_FILE_DIR:Yenah>
+			$<TARGET_FILE_DIR:Yeno>
 		COMMAND ${CMAKE_COMMAND} -E copy_if_different 
 			"${CMAKE_CURRENT_LIST_DIR}/vendor/LuaJit/lib/x64/lua51.dll"
-			$<TARGET_FILE_DIR:Yenah>)
+			$<TARGET_FILE_DIR:Yeno>)
 endif()
