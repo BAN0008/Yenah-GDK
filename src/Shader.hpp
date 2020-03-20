@@ -9,6 +9,7 @@ namespace Yenah
 		static GLuint uniform_buffer;
 
 		static void Initialize();
+		static void Cleanup();
 		static Shader *CreateFromStrings(const char *vertex_code, const char *fragment_code, const char *geometry_code = nullptr);
 		~Shader();
 

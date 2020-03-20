@@ -14,12 +14,22 @@ endif()
 list(APPEND sources "src/Main.cpp")
 list(APPEND sources "src/Window.cpp")
 list(APPEND sources "src/Renderer.cpp")
+list(APPEND sources "src/RenderBatch.cpp")
 list(APPEND sources "src/Shader.cpp")
+list(APPEND sources "src/Texture.cpp")
 list(APPEND sources "src/Log.cpp")
 list(APPEND sources "src/Lua.cpp")
 list(APPEND sources "src/Config.cpp")
 
 list(APPEND sources "vendor/${glad_dir}/src/glad.c")
+
+list(APPEND sources "vendor/stb_image/src/stb_image.cpp")
+
+list(APPEND sources "vendor/imgui/src/imgui.cpp")
+list(APPEND sources "vendor/imgui/src/imgui_draw.cpp")
+list(APPEND sources "vendor/imgui/src/imgui_widgets.cpp")
+list(APPEND sources "vendor/imgui/src/imgui_impl_opengl3.cpp")
+list(APPEND sources "vendor/imgui/src/imgui_impl_sdl.cpp")
 
 add_executable(Yenah ${sources})
 
@@ -27,6 +37,7 @@ target_include_directories(Yenah PRIVATE "vendor/${glad_dir}/include")
 target_include_directories(Yenah PRIVATE "vendor/glm/include")
 target_include_directories(Yenah PRIVATE "vendor/LuaJit/include")
 target_include_directories(Yenah PRIVATE "vendor/imgui/include")
+target_include_directories(Yenah PRIVATE "vendor/stb_image/include")
 target_include_directories(Yenah PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/lua")
 
 file(READ "src/lua/main.lua" main_lua)
@@ -36,7 +47,7 @@ if(UNIX)
 	target_include_directories(Yenah PRIVATE "/usr/include/SDL2")
 	target_compile_definitions(Yenah PRIVATE UNIX)
 
-	target_link_libraries(Yenah "dl" "luajit-5.1" "stdc++")
+	target_link_libraries(Yenah "dl" "luajit-5.1" "m" "stdc++")
 endif()
 if(WIN32)
 	target_include_directories(Yenah PRIVATE "vendor/SDL2/include")
@@ -46,6 +57,8 @@ if(WIN32)
 endif()
 
 target_link_libraries(Yenah "SDL2")
+
+target_compile_features(Yenah PRIVATE cxx_nullptr)
 
 set_target_properties(Yenah PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG   "${CMAKE_CURRENT_BINARY_DIR}/debug")
 set_target_properties(Yenah PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_CURRENT_BINARY_DIR}/release")

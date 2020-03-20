@@ -7,9 +7,10 @@ const char *default_vertex_code = R"(
 #extension GL_ARB_explicit_attrib_location : enable
 layout (location = 0) in vec4 vertex;
 layout (location = 1) in vec4 colour;
-layout (location = 2) in int sampler;
+//layout (location = 2) in int sampler;
 
 out vec4 frag_colour;
+out vec2 tex_coord;
 
 layout (std140) uniform matrices
 {
@@ -20,23 +21,31 @@ layout (std140) uniform matrices
 void main()
 {
 	frag_colour = colour;
-	gl_Position = projection * view * vec4(vertex.xy, 0.0, 1.0);
+	//gl_Position = projection * view * vec4(vertex.xy, 0.0, 1.0);
+	gl_Position = projection * vec4(vertex.xy, 0.0, 1.0);
+	//gl_Position = vec4(vertex.xy, 0.0, 1.0);
+	tex_coord = vertex.zw;
 })";
 
 const char *default_fragment_code = R"(
 #version 150 core
 in vec4 frag_colour;
+in vec2 tex_coord;
 out vec4 out_frag_colour;
+
+uniform sampler2D epic_sampler;
 
 void main()
 {
-	out_frag_colour = frag_colour;
+	//out_frag_colour = frag_colour;
+	out_frag_colour = texture(epic_sampler, tex_coord);
+	//out_frag_colour = vec4(tex_coord.xy, 0.0f, 1.0);
 })";
 
 namespace Yenah
 {
 	Shader *Shader::default_shader = nullptr;
-	GLuint Shader::uniform_buffer = 0;
+	GLuint  Shader::uniform_buffer = 0;
 
 	Shader::Shader()
 	{
@@ -56,6 +65,16 @@ namespace Yenah
 
 		default_shader = CreateFromStrings(default_vertex_code, default_fragment_code);
 		default_shader->Bind();
+	}
+
+	void Shader::Cleanup()
+	{
+		if (default_shader != nullptr) {
+			delete default_shader;
+			default_shader = nullptr;
+		}
+
+		glDeleteBuffers(1, &uniform_buffer);
 	}
 
 	Shader *Shader::CreateFromStrings(const char *vertex_code, const char *fragment_code, const char *geometry_code)
@@ -116,5 +135,6 @@ namespace Yenah
 	void Shader::Bind()
 	{
 		glUseProgram(program_id);
+		glUniform1i(glGetUniformLocation(program_id, "epic_sampler"), 0);
 	}
 }
