@@ -17,7 +17,7 @@ list(APPEND sources "src/Renderer.cpp")
 list(APPEND sources "src/Shader.cpp")
 list(APPEND sources "src/Log.cpp")
 list(APPEND sources "src/Lua.cpp")
-list(APPEND sources "src/Lua/LuaWrapper.cpp")
+list(APPEND sources "src/Config.cpp")
 
 list(APPEND sources "vendor/${glad_dir}/src/glad.c")
 
@@ -29,14 +29,14 @@ target_include_directories(Yenah PRIVATE "vendor/LuaJit/include")
 target_include_directories(Yenah PRIVATE "vendor/imgui/include")
 target_include_directories(Yenah PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/lua")
 
-file(READ "src/Lua/private/ffi.lua" lua_ffi)
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lua/lua_ffi.h" "const char lua_ffi_code[] = R\"(${lua_ffi})\";")
+file(READ "src/lua/main.lua" main_lua)
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lua/main_lua.h" "const char main_lua_code[] = R\"(${main_lua})\";")
 
 if(UNIX)
 	target_include_directories(Yenah PRIVATE "/usr/include/SDL2")
 	target_compile_definitions(Yenah PRIVATE UNIX)
 
-	target_link_libraries(Yenah "dl" "luajit-5.1")
+	target_link_libraries(Yenah "dl" "luajit-5.1" "stdc++")
 endif()
 if(WIN32)
 	target_include_directories(Yenah PRIVATE "vendor/SDL2/include")

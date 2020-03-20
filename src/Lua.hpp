@@ -16,20 +16,6 @@ namespace Yenah
 		bool Initialize();
 		void ReadConfig();
 		void Start();
-
-		void UpdateObjects(double dt);
-		void DrawObjects();
-
 		void Cleanup();
-
-		namespace EngineConfig
-		{
-			struct window_c
-			{
-				int width, height;
-				char *title, *icon;
-			};
-			extern struct window_c window;
-		}
 	}
 }

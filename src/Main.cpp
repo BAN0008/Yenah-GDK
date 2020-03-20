@@ -2,6 +2,7 @@
 #include "Renderer.hpp"
 #include "Log.hpp"
 #include "Lua.hpp"
+#include "Config.hpp"
 
 #ifdef WIN32
 	#include <direct.h>
@@ -23,24 +24,17 @@ int main(int argc, const char *argv[])
 		return 1;
 	}
 
-	// Start up LuaJit and read the engine config
 	Lua::Initialize();
 	Lua::ReadConfig();
 
 	Window::Create(
-		Lua::EngineConfig::window.title, 
-		Lua::EngineConfig::window.width,
-		Lua::EngineConfig::window.height);
+		Config::window_title, 
+		Config::window_width,
+		Config::window_height);
 
 	Renderer::Initialize();
-	Lua::Start();
 
-	while (true) {
-		//Window::ProcessEvents();
-		Lua::UpdateObjects(69.0);
-		//Window::SwapBuffers();
-		Lua::DrawObjects();
-	}
+	Lua::Start();
 
 	Renderer::Cleanup();
 	Window::Destroy();
