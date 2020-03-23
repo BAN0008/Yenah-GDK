@@ -96,16 +96,16 @@ namespace Yenah
 			Shader::Cleanup();
 		}
 
-		void DrawQuad(glm::vec2 position, glm::vec2 size, glm::vec4 colour, float radians, unsigned int layer, Texture *texture)
+		void DrawQuad(float x, float y, float w, float h, float r, float g, float b, float a, float radians, unsigned int layer, Texture *texture)
 		{
 			Vertex *vertices = (Vertex *)malloc(sizeof(Vertex) * 6);
-			vertices[0] = {position.x,          position.y,          0.0f, 1.0f, colour.r, colour.g, colour.b, colour.a};
-			vertices[1] = {position.x + size.x, position.y,          1.0f, 1.0f, colour.r, colour.g, colour.b, colour.a};
-			vertices[2] = {position.x + size.x, position.y + size.y, 1.0f, 0.0f, colour.r, colour.g, colour.b, colour.a};
+			vertices[0] = {x,     y,     0.0f, 1.0f, r, g, b, a};
+			vertices[1] = {x + w, y,     1.0f, 1.0f, r, g, b, a};
+			vertices[2] = {x + w, y + h, 1.0f, 0.0f, r, g, b, a};
 
-			vertices[3] = {position.x + size.x, position.y + size.y, 1.0f, 0.0f, colour.r, colour.g, colour.b, colour.a};
-			vertices[4] = {position.x,          position.y + size.y, 0.0f, 0.0f, colour.r, colour.g, colour.b, colour.a};
-			vertices[5] = {position.x,          position.y,          0.0f, 1.0f, colour.r, colour.g, colour.b, colour.a};
+			vertices[3] = {x + w, y + h, 1.0f, 0.0f, r, g, b, a};
+			vertices[4] = {x,     y + h, 0.0f, 0.0f, r, g, b, a};
+			vertices[5] = {x,     y,     0.0f, 1.0f, r, g, b, a};
 
 			//if (draw_list.empty()) {
 				draw_list.emplace_front( nullptr, layer, 6, vertices, texture );
@@ -200,6 +200,7 @@ namespace Yenah
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplSDL2_NewFrame(Window::window);
 			ImGui::NewFrame();
+			Window::SwapBuffers();
 		}
 
 		void SetVSync(bool enabled)

@@ -1,6 +1,8 @@
 #include "Texture.hpp"
 #include "Log.hpp"
+#include "Lua.hpp"
 #include <stb_image.h>
+#include <vector>
 
 namespace Yenah
 {
@@ -38,5 +40,20 @@ namespace Yenah
 	GLuint Texture::GetID()
 	{
 		return texture_id;
+	}
+
+	std::vector<Texture *> textures;
+
+	FFI_EXPORT void *CreateTexture(const char *fname)
+	{
+		textures.push_back(new Texture(fname));
+		return (void *)(textures.size() - 1);
+	}
+
+	FFI_EXPORT void DeleteTexture(void *id)
+	{
+		Log::Info("Texture %lu deleted", (unsigned long)id);
+		delete textures[(unsigned long)id];
+		textures[(unsigned long)id] = nullptr;
 	}
 }

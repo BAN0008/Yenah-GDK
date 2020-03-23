@@ -3,6 +3,7 @@ local ffi = require 'ffi'
 
 ffi.cdef[[
 	bool ProcessEvents();
+	void RenderFrame();
 ]]
 
 game.init()
@@ -17,5 +18,6 @@ while running do
 	game.post_update()
 	game.pre_draw()
 	game.post_draw()
+	ffi.C.RenderFrame();
 end
 game.quit()

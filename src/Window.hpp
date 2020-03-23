@@ -1,6 +1,6 @@
 #pragma once
+#include "Lua.hpp"
 #include <SDL.h>
-#define FFI_EXPORT extern "C" __attribute__ ((visibility ("default")))
 
 namespace Yenah
 {

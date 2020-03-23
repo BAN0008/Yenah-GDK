@@ -43,6 +43,9 @@ target_include_directories(Yenah PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/lua")
 file(READ "src/lua/main.lua" main_lua)
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lua/main_lua.h" "const char main_lua_code[] = R\"(${main_lua})\";")
 
+file(READ "src/lua/texture.lua" texture_lua)
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lua/texture_lua.h" "const char texture_lua_code[] = R\"(${texture_lua})\";")
+
 if(UNIX)
 	target_include_directories(Yenah PRIVATE "/usr/include/SDL2")
 	target_compile_definitions(Yenah PRIVATE UNIX)
@@ -58,7 +61,8 @@ endif()
 
 target_link_libraries(Yenah "SDL2")
 
-target_compile_features(Yenah PRIVATE cxx_nullptr)
+#target_compile_features(Yenah PRIVATE cxx_nullptr)
+target_compile_features(Yenah PRIVATE cxx_std_11)
 
 set_target_properties(Yenah PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG   "${CMAKE_CURRENT_BINARY_DIR}/debug")
 set_target_properties(Yenah PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_CURRENT_BINARY_DIR}/release")

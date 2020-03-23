@@ -1,5 +1,7 @@
 #pragma once
 
+#define FFI_EXPORT extern "C" __attribute__ ((visibility ("default")))
+
 extern "C" {
 	#include <lua.h>
 	#include <lualib.h>

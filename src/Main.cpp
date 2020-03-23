@@ -56,8 +56,9 @@ int main(int argc, const char *argv[])
 		// Draw quads
 		for (int x = 0; x < (1920 / 128) + 1; x++) {
 			for (int y = 0; y < (1080 / 64) + 1; y++) {
-				Renderer::DrawQuad({x * 128.0f, y * 64.0f}, {64.0f, 64.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, 0.0f, 0, texture1);
-				Renderer::DrawQuad({(x * 128.0f) + 64.0f, y * 64.0f}, {64.0f, 64.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, 0.0f, 0, texture2);
+				Renderer::DrawQuad(x * 128.0f, y * 64.0f, 64.0f, 64.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0, texture1);
+				//Renderer::DrawQuad({x * 128.0f, y * 64.0f}, {64.0f, 64.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, 0.0f, 0, texture1);
+				//Renderer::DrawQuad({(x * 128.0f) + 64.0f, y * 64.0f}, {64.0f, 64.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, 0.0f, 0, texture2);
 			}
 		}
 
@@ -70,7 +71,7 @@ int main(int argc, const char *argv[])
 
 		// Render frame
 		Renderer::RenderFrame();
-		Window::SwapBuffers();
+		//Window::SwapBuffers();
 	}
 
 	delete texture1;

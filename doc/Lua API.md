@@ -3,6 +3,11 @@
 ## Important Features
 ### Textures
 **Functions**
+```
+-- Textures will be stored as {id, __index=Yenah.Texture}
+
+Yenah.Texture.Load(fname) -- Returns a new texture from a file
+```
 ### Shaders
 **Functions**
 ```

@@ -3,6 +3,7 @@ local Game = {}
 
 -- This function is called when the game starts
 function Game.init()
+	texture1 = Texture:Load("res/clover.png");
 	print("TestApp initialized")
 end
 
