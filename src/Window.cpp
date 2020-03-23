@@ -1,10 +1,9 @@
 #include "Window.hpp"
 #include "Config.hpp"
+#include "Renderer.hpp"
 #include "Log.hpp"
 #include "Shader.hpp"
 #include <glad/glad.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 
 namespace Yenah
 {
@@ -60,11 +59,7 @@ namespace Yenah
 						break;
 					case SDL_WINDOWEVENT:
 						if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
-							// TODO: Handle window resize event
-							glm::mat4 projection = glm::ortho(0.0f, (float)event.window.data1, (float)event.window.data2, 0.0f);
-							glBindBuffer(GL_UNIFORM_BUFFER, Shader::uniform_buffer);
-							glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), &projection[0][0]);
-							glViewport(0, 0, event.window.data1, event.window.data2);
+							Renderer::ResizeViewport(event.window.data1, event.window.data2);
 						}
 						break;
 				}

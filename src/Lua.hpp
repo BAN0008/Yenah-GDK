@@ -1,6 +1,11 @@
 #pragma once
 
-#define FFI_EXPORT extern "C" __attribute__ ((visibility ("default")))
+#ifdef UNIX
+	#define FFI_EXPORT extern "C" __attribute__ ((visibility ("default")))
+#endif
+#ifdef WIN32
+	#define FFI_EXPORT extern "C" __declspec(dllexport)
+#endif
 
 extern "C" {
 	#include <lua.h>

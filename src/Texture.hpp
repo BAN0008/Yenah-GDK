@@ -1,5 +1,6 @@
 #pragma once
 #include <glad/glad.h>
+#include <vector>
 
 namespace Yenah
 {
@@ -8,6 +9,8 @@ namespace Yenah
 	public:
 		Texture(const char *fname);
 		~Texture();
+
+		static std::vector<Texture *> textures;
 
 		void Bind();
 		GLuint GetID();

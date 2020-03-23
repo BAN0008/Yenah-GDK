@@ -19,7 +19,11 @@ end
 
 -- This function is called before the game entities are drawn
 function Game.pre_draw()
-
+	for x=0,1280,48 do
+		for y=0,720,48 do
+			Renderer.DrawQuad(x, y, 16, 16, 0, 1, 1, 1, 1, 0, texture1)
+		end
+	end
 end
 
 -- This function is called after the game entities are drawn

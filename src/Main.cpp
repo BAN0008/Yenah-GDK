@@ -1,11 +1,12 @@
+#include <SDL.h>
 #include "Window.hpp"
 #include "Renderer.hpp"
 #include "Log.hpp"
 #include "Lua.hpp"
 #include "Config.hpp"
 #include "Texture.hpp"
-#include <SDL.h>
 #include <imgui.h>
+#undef main
 
 #ifdef WIN32
 	#include <direct.h>
@@ -36,6 +37,7 @@ int main(int argc, const char *argv[])
 		Config::window_height);
 
 	Renderer::Initialize();
+	Renderer::ResizeViewport(Config::window_width, Config::window_height);
 
 	Lua::Start();
 
@@ -77,9 +79,9 @@ int main(int argc, const char *argv[])
 	delete texture1;
 	delete texture2;*/
 
+	Lua::Cleanup();
 	Renderer::Cleanup();
 	Window::Destroy();
-	Lua::Cleanup();
 	return 0;
 }
 

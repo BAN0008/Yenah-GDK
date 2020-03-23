@@ -1,8 +1,9 @@
 #include "Lua.hpp"
 #include "Log.hpp"
 #include "Config.hpp"
-#include <texture_lua.h>
 #include <main_lua.h>
+#include <texture_lua.h>
+#include <renderer_lua.h>
 #include <SDL.h>
 
 namespace Yenah
@@ -77,6 +78,12 @@ namespace Yenah
 		{
 			if (luaL_dostring(gL, texture_lua_code)) {
 				Log::Error("Failed to execute texture.lua");
+				Log::Error(lua_tostring(gL, -1));
+				lua_pop(gL, 1);
+			}
+			
+			if (luaL_dostring(gL, renderer_lua_code)) {
+				Log::Error("Failed to execute renderer.lua");
 				Log::Error(lua_tostring(gL, -1));
 				lua_pop(gL, 1);
 			}

@@ -6,6 +6,8 @@
 #include <forward_list>
 #include <SDL.h>
 #include <glad/glad.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include <imgui.h>
 #include <imgui_impl_sdl.h>
@@ -40,7 +42,11 @@ namespace Yenah
 			{
 				//return (a.layer < b.layer);
 				//return false;
-				return (a.texture->GetID() > b.texture->GetID());
+				//return (a.texture->GetID() > b.texture->GetID());
+				if (!(a.layer < b.layer)) {
+					return (a.texture->GetID() > b.texture->GetID());
+				}
+				return true;
 			}
 		};
 
@@ -96,7 +102,16 @@ namespace Yenah
 			Shader::Cleanup();
 		}
 
-		void DrawQuad(float x, float y, float w, float h, float r, float g, float b, float a, float radians, unsigned int layer, Texture *texture)
+		void ResizeViewport(int width, int height)
+		{
+			glm::mat4 projection = glm::ortho(0.0f, (float)width, (float)height, 0.0f);
+			glBindBuffer(GL_UNIFORM_BUFFER, Shader::uniform_buffer);
+			glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), &projection[0][0]);
+			glViewport(0, 0, width, height);
+		}
+
+		//void DrawQuad(float x, float y, float w, float h, float r, float g, float b, float a, float radians, unsigned int layer, Texture *texture)
+		void DrawQuad(float x, float y, float w, float h, float radians, float r, float g, float b, float a, unsigned int layer, void *texture)
 		{
 			Vertex *vertices = (Vertex *)malloc(sizeof(Vertex) * 6);
 			vertices[0] = {x,     y,     0.0f, 1.0f, r, g, b, a};
@@ -108,7 +123,7 @@ namespace Yenah
 			vertices[5] = {x,     y,     0.0f, 1.0f, r, g, b, a};
 
 			//if (draw_list.empty()) {
-				draw_list.emplace_front( nullptr, layer, 6, vertices, texture );
+				draw_list.emplace_front( Shader::default_shader, layer, 6, vertices, Texture::textures[(unsigned long)texture]);
 				return;
 			//}
 			/*for (auto it = draw_list.begin(); it != draw_list.end(); it++) {
@@ -140,60 +155,46 @@ namespace Yenah
 
 		void RenderFrame()
 		{
-			glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+			//glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT);
 
-			draw_list.sort(Drawable::Compare);
+			//draw_list.sort(Drawable::Compare);
 
 			// Render draw_list
 			if (!draw_list.empty()) {
-				int texture_changes = 0;
-				Shader  *previous_shader = draw_list.front().shader;
+				Shader *previous_shader = draw_list.front().shader;
+				previous_shader->Bind();
 				Texture *previous_texture = draw_list.front().texture;
-				previous_texture->Bind();
-				//previous_shader->Bind();
-				for (Drawable *drawable = &draw_list.front(); true; drawable = &draw_list.front())
-				{
-					if (previous_shader != drawable->shader) {
+				previous_texture->Bind(); // TODO: Fix
+				unsigned int texture_units_used = 0;
+				for (auto it = draw_list.begin(); it != draw_list.end(); it++) {
+					if (it->shader != previous_shader) {
 						RenderBatch::Flush();
-						previous_shader = drawable->shader;
-						//previous_shader->Bind();
+						texture_units_used = 0;
+						
+						previous_shader = it->shader;
+						previous_shader->Bind();
 					}
-					if (previous_texture != drawable->texture) {
-						RenderBatch::Flush();
-						texture_changes++;
-						previous_texture = drawable->texture;
-						previous_texture->Bind();
+					if (it->texture != previous_texture) {
+						if (++texture_units_used > GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS) {
+							RenderBatch::Flush();
+							texture_units_used = 0;
+						}
+
+						previous_texture = it->texture;
 					}
 
-					//else if (RenderBatch::GetVertexCount() + drawable.vertex_count < ...) RenderBatch::Flush(); // TODO: Fix
-
-					// Add vertices to RenderBatch
-					for (unsigned int i = 0; i < drawable->vertex_count; i++) {
-						RenderBatch::AddVertex(drawable->vertices + i);
+					// Add to RenderBatch
+					for (unsigned int i = 0; i < it->vertex_count; i++) {
+						RenderBatch::AddVertex(it->vertices + i);
 					}
-					draw_list.pop_front();
-					if (draw_list.empty()) break;
 				}
-				Log::Info("Texture changes %d", texture_changes);
-				/*for (auto drawable = draw_list.begin(); drawable != draw_list.end(); drawable++)
-				{
-					if (previous_shader != (*drawable).shader) {
-						RenderBatch::Flush();
-						previous_shader = (*drawable).shader;
-						//previous_shader->Bind();
-					}
-					//else if (RenderBatch::GetVertexCount() + drawable.vertex_count < -1) RenderBatch::Flush(); // TODO: Fix
-
-					// Add vertices to RenderBatch
-					for (unsigned int i = 0; i < (*drawable).vertex_count; i++) {
-						RenderBatch::AddVertex((*drawable).vertices + i);
-					}
-					//draw_list.pop_front();
-					if (draw_list.empty()) break;
-				}*/
 				RenderBatch::Flush();
+				texture_units_used = 0;
 			}
+
+			draw_list.clear();
 
 			ImGui::Render();
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

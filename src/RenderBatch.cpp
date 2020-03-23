@@ -1,4 +1,5 @@
 #include "RenderBatch.hpp"
+#include "Log.hpp" // TODO: Delete me
 #include <cstdlib>
 #define BATCH_SIZE 100000 // TODO: Dynamic batch size
 
@@ -52,6 +53,7 @@ namespace Yenah
 		void Flush()
 		{
 			glBindVertexArray(vao);
+			glBindBuffer(GL_ARRAY_BUFFER, vbo);
 			glBufferSubData(GL_ARRAY_BUFFER, 0, vertex_count * sizeof(Vertex), vertices);
 			glDrawArrays(GL_TRIANGLES, 0, vertex_count);
 			glBindVertexArray(0);

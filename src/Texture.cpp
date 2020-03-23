@@ -2,10 +2,11 @@
 #include "Log.hpp"
 #include "Lua.hpp"
 #include <stb_image.h>
-#include <vector>
 
 namespace Yenah
 {
+	std::vector<Texture *> Texture::textures;
+	
 	Texture::Texture(const char *fname)
 	{
 		stbi_set_flip_vertically_on_load(true);
@@ -42,18 +43,16 @@ namespace Yenah
 		return texture_id;
 	}
 
-	std::vector<Texture *> textures;
-
 	FFI_EXPORT void *CreateTexture(const char *fname)
 	{
-		textures.push_back(new Texture(fname));
-		return (void *)(textures.size() - 1);
+		Texture::textures.push_back(new Texture(fname));
+		return (void *)(Texture::textures.size() - 1);
 	}
 
 	FFI_EXPORT void DeleteTexture(void *id)
 	{
 		Log::Info("Texture %lu deleted", (unsigned long)id);
-		delete textures[(unsigned long)id];
-		textures[(unsigned long)id] = nullptr;
+		delete Texture::textures[(unsigned long)id];
+		Texture::textures[(unsigned long)id] = nullptr;
 	}
 }
