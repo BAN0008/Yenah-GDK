@@ -41,7 +41,7 @@ namespace Yenah
 			if (context != nullptr) SDL_GL_DeleteContext(context);
 			context = nullptr;
 
-			if (window == nullptr) SDL_DestroyWindow(window);
+			if (window != nullptr) SDL_DestroyWindow(window);
 			window = nullptr;
 		}
 

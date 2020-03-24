@@ -21,7 +21,6 @@ namespace Yenah
 				return false;
 			}
 			luaL_openlibs(gL);
-
 			return true;
 		}
 

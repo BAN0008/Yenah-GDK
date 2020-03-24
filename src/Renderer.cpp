@@ -3,6 +3,7 @@
 #include "Shader.hpp"
 #include "Window.hpp"
 #include "Log.hpp"
+#include "Profiler.hpp"
 #include <forward_list>
 #include <SDL.h>
 #include <glad/glad.h>
@@ -155,13 +156,16 @@ namespace Yenah
 
 		void RenderFrame()
 		{
+			Profiler::Time("FFI function call");
 			//glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			//draw_list.sort(Drawable::Compare);
+			Profiler::Time("Draw list sorting");
 
 			// Render draw_list
+			unsigned int draw_calls = 0, vertices = 0;
 			if (!draw_list.empty()) {
 				Shader *previous_shader = draw_list.front().shader;
 				previous_shader->Bind();
@@ -171,6 +175,7 @@ namespace Yenah
 				for (auto it = draw_list.begin(); it != draw_list.end(); it++) {
 					if (it->shader != previous_shader) {
 						RenderBatch::Flush();
+						draw_calls++;
 						texture_units_used = 0;
 						
 						previous_shader = it->shader;
@@ -179,6 +184,7 @@ namespace Yenah
 					if (it->texture != previous_texture) {
 						if (++texture_units_used > GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS) {
 							RenderBatch::Flush();
+							draw_calls++;
 							texture_units_used = 0;
 						}
 
@@ -188,20 +194,29 @@ namespace Yenah
 					// Add to RenderBatch
 					for (unsigned int i = 0; i < it->vertex_count; i++) {
 						RenderBatch::AddVertex(it->vertices + i);
+						vertices++;
 					}
 				}
 				RenderBatch::Flush();
+				draw_calls++;
 				texture_units_used = 0;
 			}
-
 			draw_list.clear();
+			Profiler::Time("Draw list rendering");
+
+			Profiler::SetDrawCalls(draw_calls);
+			Profiler::SetVertices(vertices);
+			Profiler::Show();
+			Profiler::Time("Profiler");
 
 			ImGui::Render();
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+			Profiler::Time("Render imgui");
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplSDL2_NewFrame(Window::window);
 			ImGui::NewFrame();
 			Window::SwapBuffers();
+			Profiler::Time("Swap buffers");
 		}
 
 		void SetVSync(bool enabled)
