@@ -67,6 +67,11 @@ namespace Yenah
 			frame.vertices = number;
 		}
 
+		void SetTextures(unsigned int number)
+		{
+			frame.textures = number;
+		}
+
 		bool EndFrame()
 		{
 			Profiler::Time("End frame");

@@ -161,34 +161,38 @@ namespace Yenah
 			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT);
 
-			//draw_list.sort(Drawable::Compare);
+			draw_list.sort(Drawable::Compare);
 			Profiler::Time("Draw list sorting");
+
+			unsigned int texture_units_used = 0;
 
 			// Render draw_list
 			unsigned int draw_calls = 0, vertices = 0;
 			if (!draw_list.empty()) {
 				Shader *previous_shader = draw_list.front().shader;
 				previous_shader->Bind();
+				texture_units_used++;
 				Texture *previous_texture = draw_list.front().texture;
 				previous_texture->Bind(); // TODO: Fix
-				unsigned int texture_units_used = 0;
 				for (auto it = draw_list.begin(); it != draw_list.end(); it++) {
 					if (it->shader != previous_shader) {
 						RenderBatch::Flush();
 						draw_calls++;
-						texture_units_used = 0;
+						//texture_units_used = 0;
 						
 						previous_shader = it->shader;
 						previous_shader->Bind();
 					}
 					if (it->texture != previous_texture) {
-						if (++texture_units_used > GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS) {
+						//if (++texture_units_used > GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS) {
 							RenderBatch::Flush();
 							draw_calls++;
-							texture_units_used = 0;
-						}
+							texture_units_used++;
+							//texture_units_used = 0;
+						//}
 
 						previous_texture = it->texture;
+						previous_texture->Bind();
 					}
 
 					// Add to RenderBatch
@@ -199,13 +203,14 @@ namespace Yenah
 				}
 				RenderBatch::Flush();
 				draw_calls++;
-				texture_units_used = 0;
+				//texture_units_used = 0;
 			}
 			draw_list.clear();
 			Profiler::Time("Draw list rendering");
 
 			Profiler::SetDrawCalls(draw_calls);
 			Profiler::SetVertices(vertices);
+			Profiler::SetTextures(texture_units_used);
 			Profiler::Show();
 			Profiler::Time("Profiler");
 
