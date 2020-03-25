@@ -13,6 +13,7 @@ endif()
 
 list(APPEND sources "src/Main.cpp")
 list(APPEND sources "src/Window.cpp")
+list(APPEND sources "src/Camera.cpp")
 list(APPEND sources "src/Renderer.cpp")
 list(APPEND sources "src/Profiler.cpp")
 list(APPEND sources "src/RenderBatch.cpp")
@@ -44,8 +45,14 @@ target_include_directories(Yenah PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/lua")
 file(READ "src/lua/main.lua" main_lua)
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lua/main_lua.h" "const char main_lua_code[] = R\"(${main_lua})\";")
 
+file(READ "src/lua/input.lua" input_lua)
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lua/input_lua.h" "const char input_lua_code[] = R\"(${input_lua})\";")
+
 file(READ "src/lua/texture.lua" texture_lua)
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lua/texture_lua.h" "const char texture_lua_code[] = R\"(${texture_lua})\";")
+
+file(READ "src/lua/camera.lua" camera_lua)
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lua/camera_lua.h" "const char camera_lua_code[] = R\"(${camera_lua})\";")
 
 file(READ "src/lua/renderer.lua" renderer_lua)
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lua/renderer_lua.h" "const char renderer_lua_code[] = R\"(${renderer_lua})\";")

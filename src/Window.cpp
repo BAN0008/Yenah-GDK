@@ -11,6 +11,12 @@ namespace Yenah
 	{
 		SDL_Window   *window  = nullptr;
 		SDL_GLContext context = nullptr;
+		char *key_state;
+
+		FFI_EXPORT char *GetKeyboardStatePtr()
+		{
+			return key_state;
+		}
 
 		bool Create(const char *title, int width, int height)
 		{
@@ -33,6 +39,9 @@ namespace Yenah
 				return false;
 			}
 			SDL_GL_MakeCurrent(window, context);
+
+			key_state = (char *)SDL_GetKeyboardState(nullptr);
+
 			return true;
 		}
 
@@ -64,6 +73,8 @@ namespace Yenah
 						break;
 				}
 			}
+
+			//key_state = (char *)SDL_GetKeyboardState(nullptr);
 			return true;
 		}
 

@@ -2,8 +2,10 @@
 #include "Log.hpp"
 #include "Config.hpp"
 #include <main_lua.h>
+#include <input_lua.h>
 #include <texture_lua.h>
 #include <renderer_lua.h>
+#include <camera_lua.h>
 #include <SDL.h>
 
 namespace Yenah
@@ -11,6 +13,18 @@ namespace Yenah
 	namespace Lua
 	{
 		lua_State *gL;
+
+		int PopulateKeyNames(lua_State *L)
+		{
+			for (int i = 0; i < 255; i++) {
+				const char *name = SDL_GetKeyName(SDL_GetKeyFromScancode((SDL_Scancode)i));
+				if (name != "") {
+					lua_pushnumber(L, i);
+					lua_setfield(L, -2, name);
+				}
+			}
+			return 0;
+		}
 
 		bool Initialize()
 		{
@@ -21,6 +35,8 @@ namespace Yenah
 				return false;
 			}
 			luaL_openlibs(gL);
+
+			lua_register(gL, "PopulateKeyNames", PopulateKeyNames);
 			return true;
 		}
 
@@ -83,6 +99,18 @@ namespace Yenah
 			
 			if (luaL_dostring(gL, renderer_lua_code)) {
 				Log::Error("Failed to execute renderer.lua");
+				Log::Error(lua_tostring(gL, -1));
+				lua_pop(gL, 1);
+			}
+
+			if (luaL_dostring(gL, camera_lua_code)) {
+				Log::Error("Failed to execute camera.lua");
+				Log::Error(lua_tostring(gL, -1));
+				lua_pop(gL, 1);
+			}
+
+			if (luaL_dostring(gL, input_lua_code)) {
+				Log::Error("Failed to execute input.lua");
 				Log::Error(lua_tostring(gL, -1));
 				lua_pop(gL, 1);
 			}

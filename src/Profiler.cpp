@@ -159,7 +159,7 @@ namespace Yenah
 
 			ImGui::Text("Draw Calls: %u", frames.back().draw_calls);
 			ImGui::Text("Vertices: %u", frames.back().vertices);
-			ImGui::Text("Textures: %u", frames.back().textures);
+			ImGui::Text("Texture Changes: %u", frames.back().textures);
 			ImGui::Text("Game Objects: %u", frames.back().game_objects);
 
 			ImGui::End();

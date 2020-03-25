@@ -8,23 +8,26 @@ ffi.cdef[[
 	void BeginFrame();
 	void Time(const char *description);
 	bool EndFrame();
+
+	unsigned long SDL_GetPerformanceCounter();
+	unsigned long SDL_GetPerformanceFrequency();
 ]]
 
 game.init()
+
 local running = true
 local pause = false
-local prev_time = os.clock()
+local prev_time = tonumber(ffi.C.SDL_GetPerformanceCounter())
 while running do
 	ffi.C.BeginFrame()
 	running = ffi.C.ProcessEvents()
 	ffi.C.Time("Event processing");
-	local current_time = os.clock();
-	local delta_time = current_time - prev_time
+	local current_time = tonumber(ffi.C.SDL_GetPerformanceCounter());
+	local delta_time = ((current_time - prev_time) / tonumber(ffi.C.SDL_GetPerformanceFrequency())) * 1000
 	prev_time = current_time
-	ffi.C.Time("Calculate delta time");
 	if not pause then
-		game.pre_update()
-		game.post_update()
+		game.pre_update(delta_time)
+		game.post_update(delta_time)
 	end
 	game.pre_draw()
 	game.post_draw()

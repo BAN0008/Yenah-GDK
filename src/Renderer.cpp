@@ -1,5 +1,6 @@
 #include "Renderer.hpp"
 #include "RenderBatch.hpp"
+#include "Camera.hpp"
 #include "Shader.hpp"
 #include "Window.hpp"
 #include "Log.hpp"
@@ -44,10 +45,10 @@ namespace Yenah
 				//return (a.layer < b.layer);
 				//return false;
 				//return (a.texture->GetID() > b.texture->GetID());
-				if (!(a.layer < b.layer)) {
+				if (a.layer == b.layer) {
 					return (a.texture->GetID() > b.texture->GetID());
 				}
-				return true;
+				return (a.layer < b.layer);
 			}
 		};
 
@@ -73,6 +74,7 @@ namespace Yenah
 
 			Shader::Initialize();
 			RenderBatch::Initialize();
+			Camera::UpdateCamera(0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f);
 
 			SDL_GL_SetSwapInterval(0); // Disable VSYNC
 			glEnable(GL_BLEND);
@@ -81,13 +83,13 @@ namespace Yenah
 			// Initialize imgui
 			ImGui::CreateContext();
 			ImGuiIO& io = ImGui::GetIO(); (void)io;
+			io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
 			io.IniFilename = nullptr;
 			ImGui_ImplSDL2_InitForOpenGL(Window::window, Window::context);
 			ImGui_ImplOpenGL3_Init("#version 150 core");
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplSDL2_NewFrame(Window::window);
 			ImGui::NewFrame();
-
 			return true;
 		}
 
@@ -157,14 +159,14 @@ namespace Yenah
 		void RenderFrame()
 		{
 			Profiler::Time("FFI function call");
-			//glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT);
-
 			draw_list.sort(Drawable::Compare);
 			Profiler::Time("Draw list sorting");
 
 			unsigned int texture_units_used = 0;
+
+			//glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT);
 
 			// Render draw_list
 			unsigned int draw_calls = 0, vertices = 0;
@@ -216,10 +218,10 @@ namespace Yenah
 
 			ImGui::Render();
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-			Profiler::Time("Render imgui");
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplSDL2_NewFrame(Window::window);
 			ImGui::NewFrame();
+			Profiler::Time("Render imgui");
 			Window::SwapBuffers();
 			Profiler::Time("Swap buffers");
 		}
