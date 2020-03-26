@@ -30,8 +30,8 @@ namespace Yenah
 		std::list<FrameInfo> frames;
 		unsigned int frame_count = 0;
 
-		unsigned long start_time = 0;
-		unsigned long previous_time = 0;
+		unsigned long long start_time = 0;
+		unsigned long long previous_time = 0;
 
 		float highest_time = -1.0f, lowest_time = -1.0f;
 
@@ -112,12 +112,14 @@ namespace Yenah
 				highest_time = -1.0f;
 			}
 
-			float times[frames.size()];
+			//float times[frames.size()];
+			float *times = new float[frames.size()];
 			int i = 0;
 			for (auto it = frames.begin(); it != frames.end(); it++) {
 				times[i++] = it->time;
 			}
 			ImGui::PlotHistogram("Frame Time", times, frames.size(), 0, nullptr, 0.0f, 33.1f);
+			delete times;
 
 			bool vsync = Renderer::GetVSync();
 			ImGui::Checkbox("VSYNC", &vsync);

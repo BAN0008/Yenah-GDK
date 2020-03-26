@@ -61,6 +61,12 @@ function Camera.SetOrigin(x, y)
 end
 
 function Camera._Update()
+	if Camera.radians > 2 * math.pi then
+		Camera.radians = Camera.radians - (2 * math.pi)
+	end
+	if Camera.radians < -2 * math.pi then
+		Camera.radians = Camera.radians + (2 * math.pi)
+	end
 	ffi.C.UpdateCamera(Camera.x, Camera.y, Camera.scale_x, Camera.scale_y, Camera.radians, Camera.origin_x, Camera.origin_y)
 end
 

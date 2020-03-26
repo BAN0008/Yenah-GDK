@@ -28,6 +28,8 @@ int main(int argc, const char *argv[])
 		return 1;
 	}
 
+	SDL_Init(SDL_INIT_VIDEO);
+
 	Lua::Initialize();
 	Lua::ReadConfig();
 
@@ -82,6 +84,8 @@ int main(int argc, const char *argv[])
 	Lua::Cleanup();
 	Renderer::Cleanup();
 	Window::Destroy();
+	
+	SDL_Quit();
 	return 0;
 }
 
