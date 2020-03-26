@@ -23,9 +23,9 @@ local prev_time = tonumber(SDL2.SDL_GetPerformanceCounter())
 while running do
 	ffi.C.BeginFrame()
 	running = ffi.C.ProcessEvents()
-	ffi.C.Time("Event processing");
-	--local current_time = tonumber(ffi.C.SDL_GetPerformanceCounter());
-	local current_time = tonumber(SDL2.SDL_GetPerformanceCounter());
+	ffi.C.Time("Event processing")
+	--local current_time = tonumber(ffi.C.SDL_GetPerformanceCounter())
+	local current_time = tonumber(SDL2.SDL_GetPerformanceCounter())
 	--local delta_time = ((current_time - prev_time) / tonumber(ffi.C.SDL_GetPerformanceFrequency())) * 1000
 	local delta_time = ((current_time - prev_time) / tonumber(SDL2.SDL_GetPerformanceFrequency())) * 1000
 	prev_time = current_time
@@ -35,8 +35,8 @@ while running do
 	end
 	game.pre_draw()
 	game.post_draw()
-	ffi.C.Time("Lua game update");
-	ffi.C.RenderFrame();
-	pause = ffi.C.EndFrame();
+	ffi.C.Time("Lua game update")
+	ffi.C.RenderFrame()
+	pause = ffi.C.EndFrame()
 end
 game.quit()

@@ -32,7 +32,7 @@ end
 
 function Camera.SetRotation(radians)
 	Camera.radians = radians
-	Camera._Update();
+	Camera._Update()
 end
 
 function Camera.GetRotation()

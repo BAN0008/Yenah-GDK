@@ -53,7 +53,11 @@ end
 -- This function is called before the game entities are drawn
 function Game.pre_draw()
 	mx, my = Input.GetMousePosition()
-	Renderer.DrawQuad(mx - 16, my - 16, 32, 32, 0, 1, 1, 1, 1, 1, texture1)
+	if Input.GetMouseButtonState("Left") then
+		Renderer.DrawQuad(mx - 16, my - 16, 32, 32, 0, 1, 1, 1, 1, 1, texture2)
+	else
+		Renderer.DrawQuad(mx - 16, my - 16, 32, 32, 0, 1, 1, 1, 1, 1, texture1)
+	end
 	Renderer.DrawQuad((1280 / 2) - 128, (720 / 2) - 128, 256, 256, 0, 1, 1, 1, 1, 2, texture2)
 	for x=0,1280,128 do
 		for y=0,720,64 do
