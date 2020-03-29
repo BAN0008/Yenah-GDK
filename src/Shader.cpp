@@ -21,8 +21,8 @@ layout (std140) uniform matrices
 void main()
 {
 	frag_colour = colour;
-	//gl_Position = projection * view * vec4(vertex.xy, 0.0, 1.0);
-	gl_Position = projection * vec4(vertex.xy, 0.0, 1.0);
+	gl_Position = projection * view * vec4(vertex.xy, 0.0, 1.0);
+	//gl_Position = projection * vec4(vertex.xy, 0.0, 1.0);
 	//gl_Position = vec4(vertex.xy, 0.0, 1.0);
 	tex_coord = vertex.zw;
 })";
@@ -38,7 +38,7 @@ uniform sampler2D epic_sampler;
 void main()
 {
 	//out_frag_colour = frag_colour;
-	out_frag_colour = texture(epic_sampler, tex_coord);
+	out_frag_colour = frag_colour * texture(epic_sampler, tex_coord);
 	//out_frag_colour = vec4(tex_coord.xy, 0.0f, 1.0);
 })";
 

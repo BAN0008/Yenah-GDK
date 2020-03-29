@@ -8,6 +8,8 @@ namespace Yenah
 	public:
 		static GLuint uniform_buffer;
 
+		static Shader *default_shader;
+
 		static void Initialize();
 		static void Cleanup();
 		static Shader *CreateFromStrings(const char *vertex_code, const char *fragment_code, const char *geometry_code = nullptr);
@@ -16,7 +18,6 @@ namespace Yenah
 		void Bind();
 	private:
 		Shader();
-		static Shader *default_shader;
 		GLuint program_id;
 	};
 }

@@ -13,12 +13,15 @@ endif()
 
 list(APPEND sources "src/Main.cpp")
 list(APPEND sources "src/Window.cpp")
+list(APPEND sources "src/Camera.cpp")
 list(APPEND sources "src/Renderer.cpp")
+list(APPEND sources "src/Profiler.cpp")
 list(APPEND sources "src/RenderBatch.cpp")
 list(APPEND sources "src/Shader.cpp")
 list(APPEND sources "src/Texture.cpp")
 list(APPEND sources "src/Log.cpp")
 list(APPEND sources "src/Lua.cpp")
+list(APPEND sources "src/Config.cpp")
 
 list(APPEND sources "vendor/${glad_dir}/src/glad.c")
 
@@ -37,6 +40,31 @@ target_include_directories(Yenah PRIVATE "vendor/glm/include")
 target_include_directories(Yenah PRIVATE "vendor/LuaJit/include")
 target_include_directories(Yenah PRIVATE "vendor/imgui/include")
 target_include_directories(Yenah PRIVATE "vendor/stb_image/include")
+target_include_directories(Yenah PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/lua")
+
+file(READ "src/lua/main.lua" main_lua)
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lua/main_lua.h" "const char main_lua_code[] = R\"(${main_lua})\";")
+
+file(READ "src/lua/object.lua" object_lua)
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lua/object_lua.h" "const char object_lua_code[] = R\"(${object_lua})\";")
+
+file(READ "src/lua/vector.lua" vector_lua)
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lua/vector_lua.h" "const char vector_lua_code[] = R\"(${vector_lua})\";")
+
+file(READ "src/lua/linked_list.lua" linked_list_lua)
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lua/linked_list_lua.h" "const char linked_list_lua_code[] = R\"(${linked_list_lua})\";")
+
+file(READ "src/lua/input.lua" input_lua)
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lua/input_lua.h" "const char input_lua_code[] = R\"(${input_lua})\";")
+
+file(READ "src/lua/texture.lua" texture_lua)
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lua/texture_lua.h" "const char texture_lua_code[] = R\"(${texture_lua})\";")
+
+file(READ "src/lua/camera.lua" camera_lua)
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lua/camera_lua.h" "const char camera_lua_code[] = R\"(${camera_lua})\";")
+
+file(READ "src/lua/renderer.lua" renderer_lua)
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lua/renderer_lua.h" "const char renderer_lua_code[] = R\"(${renderer_lua})\";")
 
 if(UNIX)
 	target_include_directories(Yenah PRIVATE "/usr/include/SDL2")
@@ -53,11 +81,15 @@ endif()
 
 target_link_libraries(Yenah "SDL2")
 
-#target_compile_options(Yenah PRIVATE "-O3")
-target_compile_features(Yenah PRIVATE cxx_nullptr)
+#target_compile_features(Yenah PRIVATE cxx_nullptr)
+target_compile_features(Yenah PRIVATE cxx_std_11)
 
 set_target_properties(Yenah PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG   "${CMAKE_CURRENT_BINARY_DIR}/debug")
+set_target_properties(Yenah PROPERTIES ARCHIVE_OUTPUT_DIRECTORY_DEBUG   "${CMAKE_CURRENT_BINARY_DIR}/debug")
+set_target_properties(Yenah PROPERTIES LIBRARY_OUTPUT_DIRECTORY_DEBUG   "${CMAKE_CURRENT_BINARY_DIR}/debug")
 set_target_properties(Yenah PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_CURRENT_BINARY_DIR}/release")
+set_target_properties(Yenah PROPERTIES ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${CMAKE_CURRENT_BINARY_DIR}/release")
+set_target_properties(Yenah PROPERTIES LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_CURRENT_BINARY_DIR}/release")
 
 if (WIN32)
 	add_custom_command(TARGET Yenah POST_BUILD 

@@ -1,9 +1,12 @@
 #include "Texture.hpp"
 #include "Log.hpp"
+#include "Lua.hpp"
 #include <stb_image.h>
 
 namespace Yenah
 {
+	std::vector<Texture *> Texture::textures;
+	
 	Texture::Texture(const char *fname)
 	{
 		stbi_set_flip_vertically_on_load(true);
@@ -38,5 +41,24 @@ namespace Yenah
 	GLuint Texture::GetID()
 	{
 		return texture_id;
+	}
+
+	FFI_EXPORT void *CreateTexture(const char *fname)
+	{
+		for (unsigned long i = 0; i < Texture::textures.size(); i++) {
+			if (Texture::textures[i] == nullptr) {
+				Texture::textures[i] = new Texture(fname);
+				return (void *)i;
+			}
+		}
+		Texture::textures.push_back(new Texture(fname));
+		return (void *)(Texture::textures.size() - 1);
+	}
+
+	FFI_EXPORT void DeleteTexture(void *id)
+	{
+		Log::Info("Texture %lu deleted", (unsigned long)id);
+		delete Texture::textures[(unsigned long)id];
+		Texture::textures[(unsigned long)id] = nullptr;
 	}
 }

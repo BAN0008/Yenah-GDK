@@ -1,11 +1,16 @@
 #include "Renderer.hpp"
 #include "RenderBatch.hpp"
+#include "Camera.hpp"
 #include "Shader.hpp"
 #include "Window.hpp"
 #include "Log.hpp"
+#include "Profiler.hpp"
 #include <forward_list>
 #include <SDL.h>
 #include <glad/glad.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/matrix_transform_2d.hpp>
 
 #include <imgui.h>
 #include <imgui_impl_sdl.h>
@@ -33,14 +38,18 @@ namespace Yenah
 
 			~Drawable()
 			{
-				free(vertices);
+				delete[] vertices;
 			}
 
 			static bool Compare(const Drawable &a, const Drawable &b)
 			{
 				//return (a.layer < b.layer);
 				//return false;
-				return (a.texture->GetID() > b.texture->GetID());
+				//return (a.texture->GetID() > b.texture->GetID());
+				if (a.layer == b.layer) {
+					return (a.texture->GetID() > b.texture->GetID());
+				}
+				return (a.layer < b.layer);
 			}
 		};
 
@@ -66,6 +75,7 @@ namespace Yenah
 
 			Shader::Initialize();
 			RenderBatch::Initialize();
+			Camera::UpdateCamera(0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f);
 
 			SDL_GL_SetSwapInterval(0); // Disable VSYNC
 			glEnable(GL_BLEND);
@@ -74,13 +84,13 @@ namespace Yenah
 			// Initialize imgui
 			ImGui::CreateContext();
 			ImGuiIO& io = ImGui::GetIO(); (void)io;
+			io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
 			io.IniFilename = nullptr;
 			ImGui_ImplSDL2_InitForOpenGL(Window::window, Window::context);
 			ImGui_ImplOpenGL3_Init("#version 150 core");
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplSDL2_NewFrame(Window::window);
 			ImGui::NewFrame();
-
 			return true;
 		}
 
@@ -96,19 +106,43 @@ namespace Yenah
 			Shader::Cleanup();
 		}
 
-		void DrawQuad(glm::vec2 position, glm::vec2 size, glm::vec4 colour, float radians, unsigned int layer, Texture *texture)
+		void ResizeViewport(int width, int height)
 		{
-			Vertex *vertices = (Vertex *)malloc(sizeof(Vertex) * 6);
-			vertices[0] = {position.x,          position.y,          0.0f, 1.0f, colour.r, colour.g, colour.b, colour.a};
-			vertices[1] = {position.x + size.x, position.y,          1.0f, 1.0f, colour.r, colour.g, colour.b, colour.a};
-			vertices[2] = {position.x + size.x, position.y + size.y, 1.0f, 0.0f, colour.r, colour.g, colour.b, colour.a};
+			glm::mat4 projection = glm::ortho(0.0f, (float)width, (float)height, 0.0f);
+			glBindBuffer(GL_UNIFORM_BUFFER, Shader::uniform_buffer);
+			glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(glm::mat4), &projection[0][0]);
+			glViewport(0, 0, width, height);
+		}
 
-			vertices[3] = {position.x + size.x, position.y + size.y, 1.0f, 0.0f, colour.r, colour.g, colour.b, colour.a};
-			vertices[4] = {position.x,          position.y + size.y, 0.0f, 0.0f, colour.r, colour.g, colour.b, colour.a};
-			vertices[5] = {position.x,          position.y,          0.0f, 1.0f, colour.r, colour.g, colour.b, colour.a};
+		//void DrawQuad(float x, float y, float w, float h, float r, float g, float b, float a, float radians, unsigned int layer, Texture *texture)
+		void DrawQuad(float x, float y, float w, float h, float radians, float r, float g, float b, float a, unsigned int layer, void *texture)
+		{
+			glm::mat3 transform(1.0f);
+
+			transform = glm::translate(transform, glm::vec2(x, y));
+
+			transform = glm::translate(transform, glm::vec2(w / 2.0f, h / 2.0f));
+			transform = glm::rotate(transform, radians);
+			transform = glm::translate(transform, glm::vec2(w / -2.0f, h / -2.0f));
+
+			transform = glm::scale(transform, glm::vec2(w, h));
+
+			glm::vec3 tl = transform * glm::vec3(0.0f, 0.0f, 1.0f);
+			glm::vec3 tr = transform * glm::vec3(1.0f, 0.0f, 1.0f);
+			glm::vec3 bl = transform * glm::vec3(0.0f, 1.0f, 1.0f);
+			glm::vec3 br = transform * glm::vec3(1.0f, 1.0f, 1.0f);
+
+			Vertex *vertices = new Vertex[6];
+			vertices[0] = {tl.x, tl.y, 0.0f, 1.0f, r, g, b, a};
+			vertices[1] = {tr.x, tr.y, 1.0f, 1.0f, r, g, b, a};
+			vertices[2] = {br.x, br.y, 1.0f, 0.0f, r, g, b, a};
+
+			vertices[3] = {br.x, br.y, 1.0f, 0.0f, r, g, b, a};
+			vertices[4] = {bl.x, bl.y, 0.0f, 0.0f, r, g, b, a};
+			vertices[5] = {tl.x, tl.y, 0.0f, 1.0f, r, g, b, a};
 
 			//if (draw_list.empty()) {
-				draw_list.emplace_front( nullptr, layer, 6, vertices, texture );
+				draw_list.emplace_front( Shader::default_shader, layer, 6, vertices, Texture::textures[(unsigned long)texture] );
 				return;
 			//}
 			/*for (auto it = draw_list.begin(); it != draw_list.end(); it++) {
@@ -140,66 +174,76 @@ namespace Yenah
 
 		void RenderFrame()
 		{
-			glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+			Profiler::Time("FFI function call");
+			draw_list.sort(Drawable::Compare);
+			Profiler::Time("Draw list sorting");
+
+			unsigned int texture_units_used = 0;
+
+			//glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT);
 
-			draw_list.sort(Drawable::Compare);
-
 			// Render draw_list
+			unsigned int draw_calls = 0, vertices = 0;
 			if (!draw_list.empty()) {
-				int texture_changes = 0;
-				Shader  *previous_shader = draw_list.front().shader;
+				Shader *previous_shader = draw_list.front().shader;
+				previous_shader->Bind();
+				texture_units_used++;
 				Texture *previous_texture = draw_list.front().texture;
-				previous_texture->Bind();
-				//previous_shader->Bind();
-				for (Drawable *drawable = &draw_list.front(); true; drawable = &draw_list.front())
-				{
-					if (previous_shader != drawable->shader) {
+				previous_texture->Bind(); // TODO: Fix
+				for (auto it = draw_list.begin(); it != draw_list.end(); it++) {
+					if (it->shader != previous_shader) {
 						RenderBatch::Flush();
-						previous_shader = drawable->shader;
-						//previous_shader->Bind();
+						draw_calls++;
+						//texture_units_used = 0;
+						
+						previous_shader = it->shader;
+						previous_shader->Bind();
 					}
-					if (previous_texture != drawable->texture) {
-						RenderBatch::Flush();
-						texture_changes++;
-						previous_texture = drawable->texture;
+					if (it->texture != previous_texture) {
+						//if (++texture_units_used > GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS) {
+							RenderBatch::Flush();
+							draw_calls++;
+							texture_units_used++;
+							//texture_units_used = 0;
+						//}
+
+						previous_texture = it->texture;
 						previous_texture->Bind();
 					}
-
-					//else if (RenderBatch::GetVertexCount() + drawable.vertex_count < ...) RenderBatch::Flush(); // TODO: Fix
-
-					// Add vertices to RenderBatch
-					for (unsigned int i = 0; i < drawable->vertex_count; i++) {
-						RenderBatch::AddVertex(drawable->vertices + i);
-					}
-					draw_list.pop_front();
-					if (draw_list.empty()) break;
-				}
-				Log::Info("Texture changes %d", texture_changes);
-				/*for (auto drawable = draw_list.begin(); drawable != draw_list.end(); drawable++)
-				{
-					if (previous_shader != (*drawable).shader) {
+					if (RenderBatch::GetVertexCount() + it->vertex_count >= BATCH_SIZE) {
 						RenderBatch::Flush();
-						previous_shader = (*drawable).shader;
-						//previous_shader->Bind();
+						draw_calls++;
 					}
-					//else if (RenderBatch::GetVertexCount() + drawable.vertex_count < -1) RenderBatch::Flush(); // TODO: Fix
 
-					// Add vertices to RenderBatch
-					for (unsigned int i = 0; i < (*drawable).vertex_count; i++) {
-						RenderBatch::AddVertex((*drawable).vertices + i);
+					// Add to RenderBatch
+					for (unsigned int i = 0; i < it->vertex_count; i++) {
+						RenderBatch::AddVertex(it->vertices + i);
+						vertices++;
 					}
-					//draw_list.pop_front();
-					if (draw_list.empty()) break;
-				}*/
+				}
 				RenderBatch::Flush();
+				draw_calls++;
+				//texture_units_used = 0;
 			}
+			draw_list.clear();
+			Profiler::Time("Draw list rendering");
+
+			Profiler::SetDrawCalls(draw_calls);
+			Profiler::SetVertices(vertices);
+			Profiler::SetTextures(texture_units_used);
+			Profiler::Show();
+			Profiler::Time("Profiler");
 
 			ImGui::Render();
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplSDL2_NewFrame(Window::window);
 			ImGui::NewFrame();
+			Profiler::Time("Render imgui");
+			Window::SwapBuffers();
+			Profiler::Time("Swap buffers");
 		}
 
 		void SetVSync(bool enabled)

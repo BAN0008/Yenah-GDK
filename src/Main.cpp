@@ -1,10 +1,12 @@
+#include <SDL.h>
 #include "Window.hpp"
 #include "Renderer.hpp"
 #include "Log.hpp"
 #include "Lua.hpp"
+#include "Config.hpp"
 #include "Texture.hpp"
-#include <SDL.h>
 #include <imgui.h>
+#undef main
 
 #ifdef WIN32
 	#include <direct.h>
@@ -26,17 +28,23 @@ int main(int argc, const char *argv[])
 		return 1;
 	}
 
+	SDL_Init(SDL_INIT_VIDEO);
+
 	Lua::Initialize();
 	Lua::ReadConfig();
 
 	Window::Create(
-		Lua::EngineConfig::window.title, 
-		Lua::EngineConfig::window.width,
-		Lua::EngineConfig::window.height);
+		Config::window_title, 
+		Config::window_width,
+		Config::window_height);
 
 	Renderer::Initialize();
+	Renderer::ResizeViewport(Config::window_width, Config::window_height);
 
-	Texture *texture1 = new Texture("res/test.png");
+start:
+	Lua::Start();
+
+	/*Texture *texture1 = new Texture("res/test.png");
 	Texture *texture2 = new Texture("res/clover.png");
 
 	bool running = true;
@@ -51,16 +59,11 @@ int main(int argc, const char *argv[])
 		running = Window::ProcessEvents();
 
 		// Draw quads
-		/*for (int x = 0; x < (1920 / 128) + 1; x++) {
+		for (int x = 0; x < (1920 / 128) + 1; x++) {
 			for (int y = 0; y < (1080 / 64) + 1; y++) {
-				Renderer::DrawQuad({x * 128.0f, y * 64.0f}, {64.0f, 64.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, 0.0f, 0, texture1);
-				Renderer::DrawQuad({(x * 128.0f) + 64.0f, y * 64.0f}, {64.0f, 64.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, 0.0f, 0, texture2);
-			}
-		}*/
-		for (int x = 0; x < (1920 / 32) + 1; x++) {
-			for (int y = 0; y < (1080 / 16) + 1; y++) {
-				Renderer::DrawQuad({x * 32.0f,           y * 16.0f}, {16.0f, 16.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, 0.0f, 0, texture1);
-				Renderer::DrawQuad({(x * 32.0f) + 16.0f, y * 16.0f}, {16.0f, 16.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, 0.0f, 0, texture2);
+				Renderer::DrawQuad(x * 128.0f, y * 64.0f, 64.0f, 64.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0, texture1);
+				//Renderer::DrawQuad({x * 128.0f, y * 64.0f}, {64.0f, 64.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, 0.0f, 0, texture1);
+				//Renderer::DrawQuad({(x * 128.0f) + 64.0f, y * 64.0f}, {64.0f, 64.0f}, {1.0f, 0.0f, 0.0f, 1.0f}, 0.0f, 0, texture2);
 			}
 		}
 
@@ -73,15 +76,24 @@ int main(int argc, const char *argv[])
 
 		// Render frame
 		Renderer::RenderFrame();
-		Window::SwapBuffers();
+		//Window::SwapBuffers();
 	}
 
 	delete texture1;
-	delete texture2;
+	delete texture2;*/
+
+	Lua::Cleanup();
+
+	if (Lua::reload) {
+		Lua::reload = false;
+		Lua::Initialize();
+		goto start;
+	}
 
 	Renderer::Cleanup();
 	Window::Destroy();
-	Lua::Cleanup();
+	
+	SDL_Quit();
 	return 0;
 }
 

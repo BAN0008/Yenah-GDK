@@ -1,31 +1,29 @@
 #pragma once
 
+#ifdef UNIX
+	#define FFI_EXPORT extern "C" __attribute__ ((visibility ("default")))
+#endif
+#ifdef WIN32
+	#define FFI_EXPORT extern "C" __declspec(dllexport)
+#endif
+
 extern "C" {
 	#include <lua.h>
 	#include <lualib.h>
 	#include <lauxlib.h>
+	#include <luajit.h>
 }
-//#include <lua.hpp>
 
 namespace Yenah 
 {
 	namespace Lua
 	{
 		extern lua_State *gL;
+		extern bool reload;
 
 		bool Initialize();
 		void ReadConfig();
-		void PopulateEngineCalls();
+		void Start();
 		void Cleanup();
-
-		namespace EngineConfig
-		{
-			struct window_c
-			{
-				int width, height;
-				char *title, *icon;
-			};
-			extern struct window_c window;
-		}
 	}
 }
