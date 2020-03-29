@@ -8,20 +8,19 @@ local bit = require 'bit'
 
 ffi.cdef[[
 	unsigned int SDL_GetMouseState(int *x, int *y);
-	char *GetKeyboardStatePtr();
+	unsigned char *GetKeyboardStatePtr();
 	int SDL_ShowCursor(int show_cursor);
 ]]
 
 local SDL2 = ffi.load("SDL2", true)
---local Input = {}
-Input = {}
+local Input = {}
 Input._keys = ffi.C.GetKeyboardStatePtr()
 Input._key_names = {}
 
 PopulateKeyNames(Input._key_names)
 
 function Input.GetKeyState(key)
-	return Input._keys[Input._key_names[key]] == 1
+	return Input._keys[Input._key_names[key]]
 end
 
 function Input.SetMousePosition(x, y)
@@ -56,4 +55,4 @@ function Input.ShowCursor(show_cursor)
 	SDL2.SDL_ShowCursor(show_cursor)
 end
 
---return Input
+return Input

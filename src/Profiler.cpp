@@ -1,5 +1,7 @@
+
 #include "Profiler.hpp"
 #include "Renderer.hpp"
+#include "Window.hpp"
 #include <list>
 #include <string>
 #include <imgui.h>
@@ -9,6 +11,8 @@ namespace Yenah
 {
 	namespace Profiler
 	{
+		bool show_profiler = false;
+
 		struct FrameInfo
 		{
 			float time; // Frame time
@@ -24,7 +28,8 @@ namespace Yenah
 			unsigned int game_objects; // Number of game objects updated
 		};
 
-		bool profile = true, pause = false, advance_frame = false;
+		bool profile = true, pause = false;
+		short advance_frame = 0;
 
 		//FrameInfo *frames = nullptr;
 		std::list<FrameInfo> frames;
@@ -72,12 +77,36 @@ namespace Yenah
 			frame.textures = number;
 		}
 
+		void SetGameObjects(unsigned int number)
+		{
+			frame.game_objects = number;
+		}
+
 		bool EndFrame()
 		{
+			if (Window::key_state[SDL_SCANCODE_F4] == Window::KeyState::PRESSED) {
+				pause = false;
+				advance_frame = 1;
+			}
+			if (advance_frame == 0) {
+				if (Window::key_state[SDL_SCANCODE_F3] == Window::KeyState::PRESSED) pause = !pause;
+			}
+			profile = !pause;
+
 			Profiler::Time("End frame");
 			float time = ((float)(SDL_GetPerformanceCounter() - start_time) / (float)SDL_GetPerformanceFrequency()) * 1000.0f;
 			frame.time = time;
 
+			if (advance_frame == 2) {
+				advance_frame = 0;
+				pause = true;
+				profile = false;
+			}
+			if (advance_frame == 1) {
+				advance_frame = 2;
+				pause = false;
+				profile = true;
+			}
 			if (profile) {
 				if (time > highest_time || highest_time < 0.0f) highest_time = time;
 				if (lowest_time > time  || lowest_time < 0.0f)  lowest_time = time;
@@ -85,22 +114,23 @@ namespace Yenah
 				frames.push_back(frame);
 				if (frames.size() > 60) frames.pop_front();
 			}
-			if (advance_frame) {
-				advance_frame = false;
-				profile = false;
-				pause = true;
-			}
+
 			return pause;
 		}
 
 		void Show()
 		{
+			if (!show_profiler) return;
 			ImGui::Begin("Profiler");
 
-			ImGui::Checkbox("Pause", &pause);
-			if (ImGui::Button("Advance Frame")) {
+			if (ImGui::Button("Reload")) {
+				Lua::reload = true;
+			}
+
+			ImGui::Checkbox("Pause (F3)", &pause);
+			if (ImGui::Button("Advance Frame (F4)")) {
 				pause = false;
-				advance_frame = true;
+				advance_frame = 1;
 			}
 			profile = !pause;
 
@@ -119,7 +149,7 @@ namespace Yenah
 				times[i++] = it->time;
 			}
 			ImGui::PlotHistogram("Frame Time", times, frames.size(), 0, nullptr, 0.0f, 33.1f);
-			delete times;
+			delete[] times;
 
 			bool vsync = Renderer::GetVSync();
 			ImGui::Checkbox("VSYNC", &vsync);

@@ -1,7 +1,6 @@
 #include "RenderBatch.hpp"
 #include "Log.hpp" // TODO: Delete me
 #include <cstdlib>
-#define BATCH_SIZE 100000 // TODO: Dynamic batch size
 
 namespace Yenah
 {
@@ -13,7 +12,8 @@ namespace Yenah
 
 		void Initialize()
 		{
-			vertices = (Vertex *)malloc(sizeof(Vertex) * BATCH_SIZE);
+			//vertices = (Vertex *)malloc(sizeof(Vertex) * BATCH_SIZE);
+			vertices = new Vertex[BATCH_SIZE];
 
 			glGenVertexArrays(1, &vao);
 			glBindVertexArray(vao);
@@ -35,7 +35,7 @@ namespace Yenah
 			glDeleteBuffers(1, &vbo);
 			glDeleteVertexArrays(1, &vao);
 			vertex_count = 0;
-			free(vertices);
+			delete[] vertices;
 		}
 
 		void AddVertex(Vertex *vertex)

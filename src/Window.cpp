@@ -3,17 +3,19 @@
 #include "Renderer.hpp"
 #include "Log.hpp"
 #include "Shader.hpp"
+#include "Profiler.hpp"
 #include <glad/glad.h>
 
 namespace Yenah
 {
 	namespace Window
 	{
+		unsigned char *key_state = nullptr;
+
 		SDL_Window   *window  = nullptr;
 		SDL_GLContext context = nullptr;
-		char *key_state;
 
-		FFI_EXPORT char *GetKeyboardStatePtr()
+		FFI_EXPORT unsigned char *GetKeyboardStatePtr()
 		{
 			return key_state;
 		}
@@ -40,13 +42,18 @@ namespace Yenah
 			}
 			SDL_GL_MakeCurrent(window, context);
 
-			key_state = (char *)SDL_GetKeyboardState(nullptr);
+			key_state = new unsigned char[SDL_NUM_SCANCODES];
+			for (unsigned int i = 0; i < SDL_NUM_SCANCODES; i++) {
+				key_state[i] = KeyState::UP;
+			}
 
 			return true;
 		}
 
 		void Destroy()
 		{
+			delete[] key_state;
+
 			if (context != nullptr) SDL_GL_DeleteContext(context);
 			context = nullptr;
 
@@ -56,16 +63,37 @@ namespace Yenah
 
 		bool ProcessEvents()
 		{
+			for (unsigned int i = 0; i < SDL_NUM_SCANCODES; i++) {
+				if (key_state[i] == KeyState::PRESSED)  key_state[i] = KeyState::DOWN;
+				if (key_state[i] == KeyState::RELEASED) key_state[i] = KeyState::UP;
+				if (key_state[i] == KeyState::REPEAT)   key_state[i] = KeyState::DOWN;
+			}
+
 			SDL_Event event;
 			while (SDL_PollEvent(&event)) {
 				switch (event.type) {
 					case SDL_QUIT:
 						return false;
-					case SDL_KEYDOWN:
+					/*case SDL_KEYDOWN:
 						if (event.key.keysym.sym == Config::debug_overlay_toggle_key) {
-							// TODO: Toggle debug overlay
+							Profiler::show_profiler = !Profiler::show_profiler;
+						}
+						break;*/
+					case SDL_KEYDOWN:
+						if (event.key.repeat) {
+							key_state[event.key.keysym.scancode] = KeyState::REPEAT;
+						}
+						else {
+							key_state[event.key.keysym.scancode] = KeyState::PRESSED;
 						}
 						break;
+					case SDL_KEYUP:
+						if (event.key.repeat) {
+							key_state[event.key.keysym.scancode] = KeyState::REPEAT;
+						}
+						else {
+							key_state[event.key.keysym.scancode] = KeyState::RELEASED;
+						}
 					case SDL_WINDOWEVENT:
 						if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
 							Renderer::ResizeViewport(event.window.data1, event.window.data2);
@@ -73,9 +101,10 @@ namespace Yenah
 						break;
 				}
 			}
-
-			//key_state = (char *)SDL_GetKeyboardState(nullptr);
-			return true;
+			if (key_state[Config::debug_overlay_toggle_key] == KeyState::PRESSED) {
+				Profiler::show_profiler = !Profiler::show_profiler;
+			}
+			return (!Lua::reload);
 		}
 
 		void SwapBuffers()

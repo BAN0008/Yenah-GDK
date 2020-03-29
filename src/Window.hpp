@@ -6,6 +6,9 @@ namespace Yenah
 {
 	namespace Window
 	{
+		enum KeyState { UP = 0, RELEASED = 1, DOWN = 2, PRESSED = 3, REPEAT = 4 };
+		extern unsigned char *key_state;
+
 		extern SDL_Window   *window;
 		extern SDL_GLContext context;
 

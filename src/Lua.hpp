@@ -19,6 +19,7 @@ namespace Yenah
 	namespace Lua
 	{
 		extern lua_State *gL;
+		extern bool reload;
 
 		bool Initialize();
 		void ReadConfig();

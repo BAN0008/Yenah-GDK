@@ -45,6 +45,12 @@ namespace Yenah
 
 	FFI_EXPORT void *CreateTexture(const char *fname)
 	{
+		for (unsigned long i = 0; i < Texture::textures.size(); i++) {
+			if (Texture::textures[i] == nullptr) {
+				Texture::textures[i] = new Texture(fname);
+				return (void *)i;
+			}
+		}
 		Texture::textures.push_back(new Texture(fname));
 		return (void *)(Texture::textures.size() - 1);
 	}

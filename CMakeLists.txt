@@ -45,6 +45,15 @@ target_include_directories(Yenah PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/lua")
 file(READ "src/lua/main.lua" main_lua)
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lua/main_lua.h" "const char main_lua_code[] = R\"(${main_lua})\";")
 
+file(READ "src/lua/object.lua" object_lua)
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lua/object_lua.h" "const char object_lua_code[] = R\"(${object_lua})\";")
+
+file(READ "src/lua/vector.lua" vector_lua)
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lua/vector_lua.h" "const char vector_lua_code[] = R\"(${vector_lua})\";")
+
+file(READ "src/lua/linked_list.lua" linked_list_lua)
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lua/linked_list_lua.h" "const char linked_list_lua_code[] = R\"(${linked_list_lua})\";")
+
 file(READ "src/lua/input.lua" input_lua)
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lua/input_lua.h" "const char input_lua_code[] = R\"(${input_lua})\";")
 

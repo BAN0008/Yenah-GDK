@@ -41,6 +41,7 @@ int main(int argc, const char *argv[])
 	Renderer::Initialize();
 	Renderer::ResizeViewport(Config::window_width, Config::window_height);
 
+start:
 	Lua::Start();
 
 	/*Texture *texture1 = new Texture("res/test.png");
@@ -82,6 +83,13 @@ int main(int argc, const char *argv[])
 	delete texture2;*/
 
 	Lua::Cleanup();
+
+	if (Lua::reload) {
+		Lua::reload = false;
+		Lua::Initialize();
+		goto start;
+	}
+
 	Renderer::Cleanup();
 	Window::Destroy();
 	

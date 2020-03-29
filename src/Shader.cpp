@@ -38,7 +38,7 @@ uniform sampler2D epic_sampler;
 void main()
 {
 	//out_frag_colour = frag_colour;
-	out_frag_colour = texture(epic_sampler, tex_coord);
+	out_frag_colour = frag_colour * texture(epic_sampler, tex_coord);
 	//out_frag_colour = vec4(tex_coord.xy, 0.0f, 1.0);
 })";
 

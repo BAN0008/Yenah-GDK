@@ -10,6 +10,7 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/matrix_transform_2d.hpp>
 
 #include <imgui.h>
 #include <imgui_impl_sdl.h>
@@ -37,7 +38,7 @@ namespace Yenah
 
 			~Drawable()
 			{
-				free(vertices);
+				delete[] vertices;
 			}
 
 			static bool Compare(const Drawable &a, const Drawable &b)
@@ -116,17 +117,32 @@ namespace Yenah
 		//void DrawQuad(float x, float y, float w, float h, float r, float g, float b, float a, float radians, unsigned int layer, Texture *texture)
 		void DrawQuad(float x, float y, float w, float h, float radians, float r, float g, float b, float a, unsigned int layer, void *texture)
 		{
-			Vertex *vertices = (Vertex *)malloc(sizeof(Vertex) * 6);
-			vertices[0] = {x,     y,     0.0f, 1.0f, r, g, b, a};
-			vertices[1] = {x + w, y,     1.0f, 1.0f, r, g, b, a};
-			vertices[2] = {x + w, y + h, 1.0f, 0.0f, r, g, b, a};
+			glm::mat3 transform(1.0f);
 
-			vertices[3] = {x + w, y + h, 1.0f, 0.0f, r, g, b, a};
-			vertices[4] = {x,     y + h, 0.0f, 0.0f, r, g, b, a};
-			vertices[5] = {x,     y,     0.0f, 1.0f, r, g, b, a};
+			transform = glm::translate(transform, glm::vec2(x, y));
+
+			transform = glm::translate(transform, glm::vec2(w / 2.0f, h / 2.0f));
+			transform = glm::rotate(transform, radians);
+			transform = glm::translate(transform, glm::vec2(w / -2.0f, h / -2.0f));
+
+			transform = glm::scale(transform, glm::vec2(w, h));
+
+			glm::vec3 tl = transform * glm::vec3(0.0f, 0.0f, 1.0f);
+			glm::vec3 tr = transform * glm::vec3(1.0f, 0.0f, 1.0f);
+			glm::vec3 bl = transform * glm::vec3(0.0f, 1.0f, 1.0f);
+			glm::vec3 br = transform * glm::vec3(1.0f, 1.0f, 1.0f);
+
+			Vertex *vertices = new Vertex[6];
+			vertices[0] = {tl.x, tl.y, 0.0f, 1.0f, r, g, b, a};
+			vertices[1] = {tr.x, tr.y, 1.0f, 1.0f, r, g, b, a};
+			vertices[2] = {br.x, br.y, 1.0f, 0.0f, r, g, b, a};
+
+			vertices[3] = {br.x, br.y, 1.0f, 0.0f, r, g, b, a};
+			vertices[4] = {bl.x, bl.y, 0.0f, 0.0f, r, g, b, a};
+			vertices[5] = {tl.x, tl.y, 0.0f, 1.0f, r, g, b, a};
 
 			//if (draw_list.empty()) {
-				draw_list.emplace_front( Shader::default_shader, layer, 6, vertices, Texture::textures[(unsigned long)texture]);
+				draw_list.emplace_front( Shader::default_shader, layer, 6, vertices, Texture::textures[(unsigned long)texture] );
 				return;
 			//}
 			/*for (auto it = draw_list.begin(); it != draw_list.end(); it++) {
@@ -195,6 +211,10 @@ namespace Yenah
 
 						previous_texture = it->texture;
 						previous_texture->Bind();
+					}
+					if (RenderBatch::GetVertexCount() + it->vertex_count >= BATCH_SIZE) {
+						RenderBatch::Flush();
+						draw_calls++;
 					}
 
 					// Add to RenderBatch

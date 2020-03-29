@@ -1,5 +1,7 @@
 #pragma once
 #include <glad/glad.h>
+#include <glm/glm.hpp>
+#define BATCH_SIZE 100000 // TODO: Dynamic batch size
 
 namespace Yenah
 {

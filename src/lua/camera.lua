@@ -4,8 +4,7 @@ ffi.cdef[[
 		void UpdateCamera(float x, float y, float scale_x, float scale_y, float radians, float origin_x, float origin_y);
 ]]
 
---local Camera = {}
-Camera = {}
+local Camera = {}
 Camera.x = 0
 Camera.y = 0
 Camera.scale_x = 1
@@ -70,4 +69,4 @@ function Camera._Update()
 	ffi.C.UpdateCamera(Camera.x, Camera.y, Camera.scale_x, Camera.scale_y, Camera.radians, Camera.origin_x, Camera.origin_y)
 end
 
---return Camera
+return Camera
