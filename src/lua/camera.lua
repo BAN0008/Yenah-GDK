@@ -1,3 +1,4 @@
+-- Yenah:camera.lua
 local ffi = require 'ffi'
 
 ffi.cdef[[

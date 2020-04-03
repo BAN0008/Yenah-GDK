@@ -1,3 +1,4 @@
+-- Yenah:texture.lua
 local ffi = require 'ffi'
 
 ffi.cdef[[
@@ -16,7 +17,6 @@ function Texture.Load(fname)
 
 	local t = setmetatable({}, Texture)
 	t.id = ffi.new("void *", ffi.C.CreateTexture(fname))
-	--t.id = ffi.gc(t.id, ffi.C.DeleteTexture)
 
 	local delete_texture = function(id)
 		for k, v in pairs(Texture._cache) do

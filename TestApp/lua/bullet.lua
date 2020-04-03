@@ -26,7 +26,7 @@ function Bullet:Update(delta_time)
 end
 
 function Bullet:Draw()
-	Renderer.DrawQuad(self.x - 4, self.y - 4, 8, 8, 0, 1, 1, 1, 1, 1, texture)
+	Renderer.DrawQuad(self.x - 4, self.y - 4, 8, 8, 0, 4, 4, 1, 1, 1, 1, 2, texture)
 end
 
 return Bullet

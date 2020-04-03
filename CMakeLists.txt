@@ -3,6 +3,7 @@ project(Yenah)
 
 link_directories("vendor/SDL2/lib/x64")
 link_directories("vendor/LuaJit/lib/x64")
+link_directories("vendor/chipmunk/lib/x64")
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	set(glad_dir "glad_debug")
@@ -41,12 +42,16 @@ target_include_directories(Yenah PRIVATE "vendor/LuaJit/include")
 target_include_directories(Yenah PRIVATE "vendor/imgui/include")
 target_include_directories(Yenah PRIVATE "vendor/stb_image/include")
 target_include_directories(Yenah PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/lua")
+target_include_directories(Yenah PRIVATE "vendor/chipmunk/include")
 
 file(READ "src/lua/main.lua" main_lua)
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lua/main_lua.h" "const char main_lua_code[] = R\"(${main_lua})\";")
 
 file(READ "src/lua/object.lua" object_lua)
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lua/object_lua.h" "const char object_lua_code[] = R\"(${object_lua})\";")
+
+file(READ "src/lua/physics.lua" physics_lua)
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lua/physics_lua.h" "const char physics_lua_code[] = R\"(${physics_lua})\";")
 
 file(READ "src/lua/vector.lua" vector_lua)
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lua/vector_lua.h" "const char vector_lua_code[] = R\"(${vector_lua})\";")
@@ -79,7 +84,7 @@ if(WIN32)
 	target_link_libraries(Yenah "SDL2main" "opengl32" "luajit" "lua51")
 endif()
 
-target_link_libraries(Yenah "SDL2")
+target_link_libraries(Yenah "SDL2" "chipmunk")
 
 #target_compile_features(Yenah PRIVATE cxx_nullptr)
 target_compile_features(Yenah PRIVATE cxx_std_11)

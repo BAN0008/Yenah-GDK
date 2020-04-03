@@ -8,6 +8,7 @@
 #include <camera_lua.h>
 #include <vector_lua.h>
 #include <object_lua.h>
+#include <physics_lua.h>
 #include <linked_list_lua.h>
 #include <SDL.h>
 #include <string.h>
@@ -40,6 +41,10 @@ namespace Yenah
 			}
 			if (strcmp(module_name, "object") == 0) {
 				luaL_loadstring(L, object_lua_code);
+				return 1;
+			}
+			if (strcmp(module_name, "physics") == 0) {
+				luaL_loadstring(L, physics_lua_code);
 				return 1;
 			}
 			if (strcmp(module_name, "texture") == 0) {

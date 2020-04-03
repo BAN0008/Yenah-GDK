@@ -16,8 +16,6 @@ namespace Yenah
 			return;
 		}
 
-		Log::Info("Loaded %dx%d texture", width, height);
-
 		glGenTextures(1, &texture_id);
 		glBindTexture(GL_TEXTURE_2D, texture_id);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
@@ -57,7 +55,6 @@ namespace Yenah
 
 	FFI_EXPORT void DeleteTexture(void *id)
 	{
-		Log::Info("Texture %lu deleted", (unsigned long)id);
 		delete Texture::textures[(unsigned long)id];
 		Texture::textures[(unsigned long)id] = nullptr;
 	}

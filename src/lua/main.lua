@@ -1,3 +1,4 @@
+-- Yenah:main.lua
 package.path = package.path .. ";./lua/?.lua"
 
 local game   = require 'game'
@@ -69,3 +70,5 @@ game.quit()
 while (Object.objects.count > 0) do
 	Object.objects:Remove(Object.objects.front)
 end
+collectgarbage()
+collectgarbage()

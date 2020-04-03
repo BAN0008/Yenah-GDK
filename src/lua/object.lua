@@ -1,14 +1,15 @@
+-- Yenah:object.lua
 local LinkedList = require 'linked_list'
 
 local Object = {}
 Object.__index = Object
 Object.objects = LinkedList.New()
 
-function Object:Create()
+function Object:Create(...)
 	local t = setmetatable({}, self)
 	t.destroyed = false
 	Object.objects:PushFront(t)
-	t:Created()
+	t:Created(unpack({...}))
 	return t
 end
 
@@ -19,7 +20,7 @@ function Object:Destroy()
 end
 
 local ObjectReferenceMT = {}
-ObjectReferenceMT.__mode = "k"
+ObjectReferenceMT.__mode = "kv"
 ObjectReferenceMT.__call = function(self)
 	if self._object ~= nil then
 		if self._object.destroyed == false then

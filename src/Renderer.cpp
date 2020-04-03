@@ -1,7 +1,5 @@
 #include "Renderer.hpp"
-#include "RenderBatch.hpp"
 #include "Camera.hpp"
-#include "Shader.hpp"
 #include "Window.hpp"
 #include "Log.hpp"
 #include "Profiler.hpp"
@@ -20,38 +18,30 @@ namespace Yenah
 {
 	namespace Renderer
 	{
-		struct Drawable
+		Drawable::Drawable(Shader *shader, int layer, unsigned int vertex_count, Vertex *vertices, Texture *texture)
 		{
-			Shader *shader;
-			int layer;
-			unsigned int vertex_count;
-			Vertex *vertices;
-			Texture *texture;
+			this->shader = shader;
+			this->layer = layer;
+			this->vertex_count = vertex_count;
+			this->vertices = vertices;
+			this->texture = texture;
+		}
 
-			Drawable(Shader *shader, int layer, unsigned int vertex_count, Vertex *vertices, Texture *texture) {
-				this->shader = shader;
-				this->layer = layer;
-				this->vertex_count = vertex_count;
-				this->vertices = vertices;
-				this->texture = texture;
-			}
+		Drawable::~Drawable()
+		{
+			delete[] vertices;
+		}
 
-			~Drawable()
-			{
-				delete[] vertices;
+		bool Drawable::Compare(const Drawable &a, const Drawable &b)
+		{
+			//return (a.layer < b.layer);
+			//return false;
+			//return (a.texture->GetID() > b.texture->GetID());
+			if (a.layer == b.layer) {
+				return (a.texture->GetID() > b.texture->GetID());
 			}
-
-			static bool Compare(const Drawable &a, const Drawable &b)
-			{
-				//return (a.layer < b.layer);
-				//return false;
-				//return (a.texture->GetID() > b.texture->GetID());
-				if (a.layer == b.layer) {
-					return (a.texture->GetID() > b.texture->GetID());
-				}
-				return (a.layer < b.layer);
-			}
-		};
+			return (a.layer < b.layer);
+		}
 
 		std::forward_list<Drawable> draw_list;
 
@@ -115,16 +105,16 @@ namespace Yenah
 		}
 
 		//void DrawQuad(float x, float y, float w, float h, float r, float g, float b, float a, float radians, unsigned int layer, Texture *texture)
-		void DrawQuad(float x, float y, float w, float h, float radians, float r, float g, float b, float a, unsigned int layer, void *texture)
+		void DrawQuad(float x, float y, float w, float h, float radians, float origin_x, float origin_y, float r, float g, float b, float a, unsigned int layer, void *texture)
 		{
 			glm::mat3 transform(1.0f);
 
 			transform = glm::translate(transform, glm::vec2(x, y));
 
-			transform = glm::translate(transform, glm::vec2(w / 2.0f, h / 2.0f));
+			transform = glm::translate(transform, glm::vec2(origin_x, origin_y));
 			transform = glm::rotate(transform, radians);
-			transform = glm::translate(transform, glm::vec2(w / -2.0f, h / -2.0f));
-
+			//transform = glm::scale(transform, glm::vec2(w, h));
+			transform = glm::translate(transform, glm::vec2(-origin_x, -origin_y));
 			transform = glm::scale(transform, glm::vec2(w, h));
 
 			glm::vec3 tl = transform * glm::vec3(0.0f, 0.0f, 1.0f);

@@ -1,19 +1,36 @@
 #pragma once
 #include "Lua.hpp"
 #include "Texture.hpp"
+#include "Shader.hpp"
+#include "RenderBatch.hpp"
 #include <glm/glm.hpp>
 
 namespace Yenah
 {
 	namespace Renderer
 	{
+		struct Drawable
+		{
+			Shader *shader;
+			int layer;
+			unsigned int vertex_count;
+			Vertex *vertices;
+			Texture *texture;
+
+			Drawable(Shader *shader, int layer, unsigned int vertex_count, Vertex *vertices, Texture *texture);
+
+			~Drawable();
+			static bool Compare(const Drawable &a, const Drawable &b);
+		};
+
 		bool Initialize();
 		void Cleanup();
 		
 		void ResizeViewport(int width, int height);
 		//void DrawQuad(glm::vec2 position, glm::vec2 size, glm::vec4 colour, float radians = 0.0f, unsigned int layer = 0, Texture *texture = nullptr);
 		//void DrawQuad(float x, float y, float w, float h, float r, float g, float b, float a, float radians = 0.0f, unsigned int layer = 0, Texture *texture = nullptr);
-		FFI_EXPORT void DrawQuad(float x, float y, float w, float h, float radians, float r, float g, float b, float a, unsigned int layer, void *texture);
+		FFI_EXPORT void DrawDrawable(Drawable );
+		FFI_EXPORT void DrawQuad(float x, float y, float w, float h, float radians, float origin_x, float origin_y, float r, float g, float b, float a, unsigned int layer, void *texture);
 		FFI_EXPORT void RenderFrame();
 		void SetVSync(bool enabled);
 		bool GetVSync();
