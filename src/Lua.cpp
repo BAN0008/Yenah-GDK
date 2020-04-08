@@ -44,7 +44,9 @@ namespace Yenah
 				return 1;
 			}
 			if (strcmp(module_name, "physics") == 0) {
+				char *physics_lua_code = physics_lua();
 				luaL_loadstring(L, physics_lua_code);
+				delete[] physics_lua_code;
 				return 1;
 			}
 			if (strcmp(module_name, "texture") == 0) {
@@ -84,6 +86,8 @@ namespace Yenah
 				return false;
 			}
 			luaL_openlibs(gL);
+			
+			luaJIT_setmode(gL, 0, LUAJIT_MODE_ENGINE | LUAJIT_MODE_OFF);
 
 			lua_register(gL, "PopulateKeyNames", PopulateKeyNames);
 

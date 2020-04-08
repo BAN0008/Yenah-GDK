@@ -22,8 +22,10 @@ function Player:Created(space, x, y)
 	self.phys_body:AddToSpace(space)
 	self.phys_shape = Physics.Shape.CreateCircle(self.phys_body, 32, 0, 0)
 	self.phys_shape:SetFriction(1)
+	self.phys_shape:SetCollisionType(2)
 	--self.phys_shape = Physics.Shape.CreateBox(self.phys_body, 64, 64, 0)
 	self.phys_shape:AddToSpace(space)
+	self.space = space
 end
 
 function Player:Update(delta_time)
@@ -52,12 +54,9 @@ function Player:Update(delta_time)
 		self.phys_body:SetTorque(0.1)
 	end
 	if Input.GetMouseButtonState("Left") then
-		local bullet = Bullet:Create()
-		local mx, my = Input.GetMousePosition()
 		self.x, self.y = self.phys_body:GetPos()
-		bullet.x = self.x
-		bullet.y = self.y
-		bullet.vx, bullet.vy = Vector.Normalize(mx - (self.x), my - (self.y))
+		local mx, my = Input.GetMousePosition()
+		local bullet = Bullet:Create(self.space, self.x, self.y, Vector.Normalize(mx - (self.x), my - (self.y)))
 	end
 end
 
@@ -68,6 +67,7 @@ function Player:Draw()
 end
 
 function Player:Destroyed()
+	self.phys_shape:RemoveFromSpace()
 	self.phys_body:RemoveFromSpace()
 end
 

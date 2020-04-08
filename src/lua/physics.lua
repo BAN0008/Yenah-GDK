@@ -1,17 +1,49 @@
 -- Yenah:physics.lua
+
 local ffi = require 'ffi'
+
+local PrintAddress = function(name, addr)
+	print(string.format(name .. ": 0x%x", tonumber(ffi.cast("uintptr_t", addr))))
+end
+
 cp = ffi.load("chipmunk")
 ffi.cdef[[
 	void free(void *ptr);
+
+	typedef void cpArbiter;
 
 	typedef double cpFloat;
 	typedef unsigned char cpBool;
 	typedef struct cpVect{cpFloat x,y;} cpVect;
 
 	typedef void cpSpace;
+	typedef void *cpDataPointer;
+
+	typedef int  (*cpCollisionBeginFunc)(cpArbiter *arb, cpSpace *space, cpDataPointer data);
+	typedef int  (*cpCollisionPreSolveFunc)(cpArbiter *arb, cpSpace *space, cpDataPointer data);
+	typedef void (*cpCollisionPostSolveFunc)(cpArbiter *arb, cpSpace *space, cpDataPointer data);
+	typedef void (*cpCollisionSeparateFunc)(cpArbiter *arb, cpSpace *space, cpDataPointer data);
+	typedef void (*cpPostStepFunc)(cpSpace *space, void *obj, void *data);
+
+	typedef uintptr_t cpCollisionType;
 	typedef void cpBody;
 	typedef void cpShape;
 	typedef void cpCircleShape;
+	typedef void cpPinJoint;
+	typedef void cpConstraint;
+	typedef struct cpCollisionHandler {
+		const cpCollisionType typeA, typeB;
+		cpCollisionBeginFunc     beginFunc;
+		cpCollisionPreSolveFunc  preSolveFunc;
+		cpCollisionPostSolveFunc postSolveFunc;
+		cpCollisionSeparateFunc  seperateFunc;
+		cpDataPointer userData;
+	} cpCollisionHandler;
+	
+	typedef uintptr_t cpGroup;
+	typedef unsigned int cpBitmask;
+	
+	typedef struct cpShapeFilter{cpGroup group; cpBitmask categories; cpBitmask mask;} cpShapeFilter;
 
 	cpSpace *cpSpaceNew();
 	void     cpSpaceFree(cpSpace *space);
@@ -28,132 +60,157 @@ ffi.cdef[[
 	cpFloat  cpSpaceGetDamping(const cpSpace *space);
 	void     cpSpaceSetDamping(cpSpace *space, cpFloat value);
 
-	cpBody * cpBodyNew(cpFloat m, cpFloat i);
-	cpBody * cpBodyNewStatic();
-	cpBody * cpBodyNewKinematic();
-	void     cpBodyFree(cpBody *body);
+	cpBody *        cpBodyNew(cpFloat m, cpFloat i);
+	cpBody *        cpBodyNewStatic();
+	cpBody *        cpBodyNewKinematic();
+	void            cpBodyFree(cpBody *body);
 
-	cpVect   cpBodyGetPosition(const cpBody *body);
-	void     cpBodySetPosition(cpBody *body, cpVect pos);
-	cpFloat  cpBodyGetAngle(const cpBody *body);
-	void     cpBodySetAngle(cpBody *body, cpFloat angle);
-	cpFloat  cpBodyGetTorque(const cpBody *body);
-	void     cpBodySetTorque(cpBody *body, cpFloat torque);
+	cpVect          cpBodyGetPosition(const cpBody *body);
+	void            cpBodySetPosition(cpBody *body, cpVect pos);
+	
+	cpFloat         cpBodyGetAngle(const cpBody *body);
+	void            cpBodySetAngle(cpBody *body, cpFloat angle);
+	
+	cpVect          cpBodyGetVelocity(const cpBody *body);
+	void            cpBodySetVelocity(cpBody *body, const cpVect velocity);
+	
+	cpVect          cpBodyGetForce(const cpBody *body);
+	void            cpBodySetForce(cpBody *body, const cpVect force);
 
-	cpSpace *cpBodyGetSpace(const cpBody *body);
+	cpFloat         cpBodyGetTorque(const cpBody *body);
+	void            cpBodySetTorque(cpBody *body, cpFloat torque);
+	
+	cpDataPointer   cpBodyGetUserData(const cpBody *body);
+	void            cpBodySetUserData(cpBody *body, const cpDataPointer userdata);
 
-	void     cpBodyApplyForceAtWorldPoint(cpBody *body, const cpVect force, const cpVect point);
-	void     cpBodyApplyForceAtLocalPoint(cpBody *body, const cpVect force, const cpVect point);
-	void     cpBodyApplyImpulseAtWorldPoint(cpBody *body, const cpVect impulse, const cpVect point);
-	void     cpBodyApplyImpulseAtLocalPoint(cpBody *body, const cpVect impulse, const cpVect point);
+	cpSpace *       cpBodyGetSpace(const cpBody *body);
 
-	cpCircleShape *cpCircleShapeNew(cpBody *body, cpFloat radius, cpVect offset);
-	cpShape *      cpBoxShapeNew(cpBody *body, cpFloat width, cpFloat height, cpFloat radius);
-	void           cpShapeFree(cpShape *shape);
+	void            cpBodyApplyForceAtWorldPoint(cpBody *body, const cpVect force, const cpVect point);
+	void            cpBodyApplyForceAtLocalPoint(cpBody *body, const cpVect force, const cpVect point);
+	void            cpBodyApplyImpulseAtWorldPoint(cpBody *body, const cpVect impulse, const cpVect point);
+	void            cpBodyApplyImpulseAtLocalPoint(cpBody *body, const cpVect impulse, const cpVect point);
 
-	cpSpace *      cpShapeGetSpace(const cpShape *shape);
+	cpCircleShape * cpCircleShapeNew(cpBody *body, cpFloat radius, cpVect offset);
+	cpShape *       cpBoxShapeNew(cpBody *body, cpFloat width, cpFloat height, cpFloat radius);
+	void            cpShapeFree(cpShape *shape);
 
-	cpBody *       cpShapeGetBody(const cpShape *shape);
-	void           cpShapeSetBody(cpShape *shape, cpBody *body);
+	cpSpace *       cpShapeGetSpace(const cpShape *shape);
 
-	cpBool         cpShapeGetSensor(const cpShape *shape);
-	void           cpShapeSetSensor(cpShape *shape, cpBool value);
+	cpBody *        cpShapeGetBody(const cpShape *shape);
+	void            cpShapeSetBody(cpShape *shape, cpBody *body);
 
-	cpFloat        cpShapeGetFriction(const cpShape *shape);
-	void           cpShapeSetFriction(cpShape *shape, cpFloat friction);
+	cpBool          cpShapeGetSensor(const cpShape *shape);
+	void            cpShapeSetSensor(cpShape *shape, cpBool value);
 
-	cpPinJoint *   cpPinJointNew(cpBody *a, cpBody *b, cpVect anchorA, cpVect anchorB);
-	void           cpConstraintFree(cpConstraint *constraint);
+	cpFloat         cpShapeGetFriction(const cpShape *shape);
+	void            cpShapeSetFriction(cpShape *shape, cpFloat friction);
 
-	cpVect         cpPinJointGetanchorA(const cpConstraint *constraint);
-	void           cpPinJointSetanchorA(cpConstraint *constraint, cpVect value);
-	cpVect         cpPinJointGetanchorB(const cpConstraint *constraint);
-	void           cpPinJointSetanchorB(cpConstraint *constraint, cpVect value);
-	cpFloat        cpPinJointGetDist(const cpConstraint *constraint);
-	void           cpPinJointSetDist(cpConstraint *constraint, cpFloat value);
+	cpCollisionType cpShapeGetCollisionType(const cpShape *shape);
+	void            cpShapeSetCollisionType(cpShape *shape, cpCollisionType type);
 
-	cpConstraint * cpSlideJointNew(cpBody *a, cpBody *b, cpVect anchorA, cpVect anchorB, cpFloat min, cpFloat max);
+	cpShapeFilter   cpShapeGetFilter(const cpShape *shape);
+	void            cpShapeSetFilter(cpShape *shape, cpShapeFilter filter);
 
-	cpVect         cpSlideJointGetanchorA(const cpConstraint *constraint);
-	void           cpSlideJointSetanchorA(cpConstraint *constraint, cpVect value);
-	cpVect         cpSlideJointGetanchorB(const cpConstraint *constraint);
-	void           cpSlideJointSetanchorB(cpConstraint *constraint, cpVect value);
-	cpFloat        cpSlideJointGetMin(const cpConstraint *constraint);
-	void           cpSlideJointSetMin(cpConstraint *constraint, cpFloat value);
-	cpFloat        cpSlideJointGetMax(const cpConstraint *constraint);
-	void           cpSlideJointSetMax(cpConstraint *constraint, cpFloat value);
+	cpPinJoint *    cpPinJointNew(cpBody *a, cpBody *b, cpVect anchorA, cpVect anchorB);
+	void            cpConstraintFree(cpConstraint *constraint);
 
-	cpConstraint * cpPivotJointNew(cpBody *a, cpBody *b, cpVect pivot);
+	cpVect          cpPinJointGetanchorA(const cpConstraint *constraint);
+	void            cpPinJointSetanchorA(cpConstraint *constraint, cpVect value);
+	cpVect          cpPinJointGetanchorB(const cpConstraint *constraint);
+	void            cpPinJointSetanchorB(cpConstraint *constraint, cpVect value);
+	cpFloat         cpPinJointGetDist(const cpConstraint *constraint);
+	void            cpPinJointSetDist(cpConstraint *constraint, cpFloat value);
 
-	cpVect         cpPivotJointGetanchorA(const cpConstraint *constraint);
-	void           cpPivotJointSetanchorA(cpConstraint *constraint, cpVect value);
-	cpVect         cpPivotJointGetanchorB(const cpConstraint *constraint);
-	void           cpPivotJointSetanchorB(cpConstraint *constraint, cpVect value);
+	cpConstraint *  cpSlideJointNew(cpBody *a, cpBody *b, cpVect anchorA, cpVect anchorB, cpFloat min, cpFloat max);
 
-	cpConstraint * cpGrooveJointNew(cpBody *a, cpBody *b, cpVect groove_a, cpVect groove_b, cpVect anchorB);
+	cpVect          cpSlideJointGetanchorA(const cpConstraint *constraint);
+	void            cpSlideJointSetanchorA(cpConstraint *constraint, cpVect value);
+	cpVect          cpSlideJointGetanchorB(const cpConstraint *constraint);
+	void            cpSlideJointSetanchorB(cpConstraint *constraint, cpVect value);
+	cpFloat         cpSlideJointGetMin(const cpConstraint *constraint);
+	void            cpSlideJointSetMin(cpConstraint *constraint, cpFloat value);
+	cpFloat         cpSlideJointGetMax(const cpConstraint *constraint);
+	void            cpSlideJointSetMax(cpConstraint *constraint, cpFloat value);
 
-	cpVect         cpGrooveJointGetGrooveA(const cpConstraint *constraint);
-	void           cpGrooveJointSetGrooveA(cpConstraint *constraint, cpVect value);
-	cpVect         cpGrooveJointGetGrooveB(const cpConstraint *constraint);
-	void           cpGrooveJointSetGrooveB(cpConstraint *constraint, cpVect value);
-	cpVect         cpGrooveJointGetanchorB(const cpConstraint *constraint);
-	void           cpGrooveJointSetanchorB(cpConstraint *constraint, cpVect value);
+	cpConstraint *  cpPivotJointNew(cpBody *a, cpBody *b, cpVect pivot);
 
-	cpConstraint * cpDampedSpringNew(cpBody *a, cpBody *b, cpVect anchorA, cpVect anchorB, cpFloat restLength, cpFloat stiffness, cpFloat damping);
+	cpVect          cpPivotJointGetanchorA(const cpConstraint *constraint);
+	void            cpPivotJointSetanchorA(cpConstraint *constraint, cpVect value);
+	cpVect          cpPivotJointGetanchorB(const cpConstraint *constraint);
+	void            cpPivotJointSetanchorB(cpConstraint *constraint, cpVect value);
 
-	cpVect         cpDampedSpringGetanchorA(const cpConstraint *constraint);
-	void           cpDampedSpringSetanchorA(cpConstraint *constraint, cpVect value);
-	cpVect         cpDampedSpringGetanchorB(const cpConstraint *constraint);
-	void           cpDampedSpringSetanchorB(cpConstraint *constraint, cpVect value);
-	cpFloat        cpDampedSpringGetRestLength(const cpConstraint *constraint);
-	void           cpDampedSpringSetRestLength(cpConstraint *constraint, cpFloat value);
-	cpFloat        cpDampedSpringGetStiffness(const cpConstraint *constraint);
-	void           cpDampedSpringSetStiffness(cpConstraint *constraint, cpFloat value);
-	cpFloat        cpDampedSpringGetDamping(const cpConstraint *constraint);
-	void           cpDampedSpringSetDamping(cpConstraint *constraint, cpFloat value);
+	cpConstraint *  cpGrooveJointNew(cpBody *a, cpBody *b, cpVect groove_a, cpVect groove_b, cpVect anchorB);
 
-	cpConstraint * cpDampedRotarySpringNew(cpBody *a, cpBody *b, cpFloat restAngle, cpFloat stiffness, cpFloat damping);
+	cpVect          cpGrooveJointGetGrooveA(const cpConstraint *constraint);
+	void            cpGrooveJointSetGrooveA(cpConstraint *constraint, cpVect value);
+	cpVect          cpGrooveJointGetGrooveB(const cpConstraint *constraint);
+	void            cpGrooveJointSetGrooveB(cpConstraint *constraint, cpVect value);
+	cpVect          cpGrooveJointGetanchorB(const cpConstraint *constraint);
+	void            cpGrooveJointSetanchorB(cpConstraint *constraint, cpVect value);
 
-	cpFloat        cpDampedRotarySpringGetRestAngle(const cpConstraint *constraint);
-	void           cpDampedRotarySpringSetRestAngle(cpConstraint *constraint, cpFloat value);
-	cpFloat        cpDampedRotarySpringGetStiffness(const cpConstraint *constraint);
-	void           cpDampedRotarySpringSetStiffness(cpConstraint *constraint, cpFloat value);
-	cpFloat        cpDampedRotarySpringGetDamping(const cpConstraint *constraint);
-	void           cpDampedRotarySpringSetDamping(cpConstraint *constraint, cpFloat value);
+	cpConstraint *  cpDampedSpringNew(cpBody *a, cpBody *b, cpVect anchorA, cpVect anchorB, cpFloat restLength, cpFloat stiffness, cpFloat damping);
 
-	cpConstraint * cpRotaryLimitJointNew(cpBody *a, cpBody *b, cpFloat min, cpFloat max);
+	cpVect          cpDampedSpringGetanchorA(const cpConstraint *constraint);
+	void            cpDampedSpringSetanchorA(cpConstraint *constraint, cpVect value);
+	cpVect          cpDampedSpringGetanchorB(const cpConstraint *constraint);
+	void            cpDampedSpringSetanchorB(cpConstraint *constraint, cpVect value);
+	cpFloat         cpDampedSpringGetRestLength(const cpConstraint *constraint);
+	void            cpDampedSpringSetRestLength(cpConstraint *constraint, cpFloat value);
+	cpFloat         cpDampedSpringGetStiffness(const cpConstraint *constraint);
+	void            cpDampedSpringSetStiffness(cpConstraint *constraint, cpFloat value);
+	cpFloat         cpDampedSpringGetDamping(const cpConstraint *constraint);
+	void            cpDampedSpringSetDamping(cpConstraint *constraint, cpFloat value);
 
-	cpFloat        cpRotaryLimitJointGetMin(const cpConstraint *constraint);
-	void           cpRotaryLimitJointSetMin(cpConstraint *constraint, cpFloat value);
-	cpFloat        cpRotaryLimitJointGetMax(const cpConstraint *constraint);
-	void           cpRotaryLimitJointSetMax(cpConstraint *constraint, cpFloat value);
+	cpConstraint *  cpDampedRotarySpringNew(cpBody *a, cpBody *b, cpFloat restAngle, cpFloat stiffness, cpFloat damping);
 
-	cpConstraint * cpRatchetJointNew(cpBody *a, cpBody *b, cpFloat phase, cpFloat ratchet);
+	cpFloat         cpDampedRotarySpringGetRestAngle(const cpConstraint *constraint);
+	void            cpDampedRotarySpringSetRestAngle(cpConstraint *constraint, cpFloat value);
+	cpFloat         cpDampedRotarySpringGetStiffness(const cpConstraint *constraint);
+	void            cpDampedRotarySpringSetStiffness(cpConstraint *constraint, cpFloat value);
+	cpFloat         cpDampedRotarySpringGetDamping(const cpConstraint *constraint);
+	void            cpDampedRotarySpringSetDamping(cpConstraint *constraint, cpFloat value);
 
-	cpFloat        cpRatchetJointGetAngle(const cpConstraint *constraint);
-    void           cpRatchetJointSetAngle(cpConstraint *constraint, cpFloat value);
-    cpFloat        cpRatchetJointGetPhase(const cpConstraint *constraint);
-    void           cpRatchetJointSetPhase(cpConstraint *constraint, cpFloat value);
-    cpFloat        cpRatchetJointGetRatchet(const cpConstraint *constraint);
-    void           cpRatchetJointSetRatchet(cpConstraint *constraint, cpFloat value);
+	cpConstraint *  cpRotaryLimitJointNew(cpBody *a, cpBody *b, cpFloat min, cpFloat max);
 
-    cpConstraint * cpGearJointNew(cpBody *a, cpBody *b, cpFloat phase, cpFloat ratio);
+	cpFloat         cpRotaryLimitJointGetMin(const cpConstraint *constraint);
+	void            cpRotaryLimitJointSetMin(cpConstraint *constraint, cpFloat value);
+	cpFloat         cpRotaryLimitJointGetMax(const cpConstraint *constraint);
+	void            cpRotaryLimitJointSetMax(cpConstraint *constraint, cpFloat value);
 
-    cpFloat        cpGearJointGetPhase(const cpConstraint *constraint);
-	void           cpGearJointSetPhase(cpConstraint *constraint, cpFloat value);
-	cpFloat        cpGearJointGetRatio(const cpConstraint *constraint);
-	void           cpGearJointSetRatio(cpConstraint *constraint, cpFloat value);
+	cpConstraint *  cpRatchetJointNew(cpBody *a, cpBody *b, cpFloat phase, cpFloat ratchet);
 
-	cpConstraint * cpSimpleMotorNew(cpBody *a, cpBody *b, cpFloat rate);
+	cpFloat         cpRatchetJointGetAngle(const cpConstraint *constraint);
+    void            cpRatchetJointSetAngle(cpConstraint *constraint, cpFloat value);
+    cpFloat         cpRatchetJointGetPhase(const cpConstraint *constraint);
+    void            cpRatchetJointSetPhase(cpConstraint *constraint, cpFloat value);
+    cpFloat         cpRatchetJointGetRatchet(const cpConstraint *constraint);
+    void            cpRatchetJointSetRatchet(cpConstraint *constraint, cpFloat value);
 
-	cpFloat        cpSimpleMotorGetRate(const cpConstraint *constraint);
-	void           cpSimpleMotorSetRate(cpConstraint *constraint, cpFloat value);
+    cpConstraint *  cpGearJointNew(cpBody *a, cpBody *b, cpFloat phase, cpFloat ratio);
+
+    cpFloat         cpGearJointGetPhase(const cpConstraint *constraint);
+	void            cpGearJointSetPhase(cpConstraint *constraint, cpFloat value);
+	cpFloat         cpGearJointGetRatio(const cpConstraint *constraint);
+	void            cpGearJointSetRatio(cpConstraint *constraint, cpFloat value);
+
+	cpConstraint *  cpSimpleMotorNew(cpBody *a, cpBody *b, cpFloat rate);
+
+	cpFloat         cpSimpleMotorGetRate(const cpConstraint *constraint);
+	void            cpSimpleMotorSetRate(cpConstraint *constraint, cpFloat value);
 
 	cpFloat cpMomentForCircle(cpFloat m, cpFloat r1, cpFloat r2, cpVect offset);
 	cpFloat cpMomentForSegment(cpFloat m, cpVect a, cpVect b, cpFloat radius);
 	cpFloat cpMomentForPoly(cpFloat m, int count, const cpVect *verts, cpVect offset, cpFloat radius);
 	cpFloat cpMomentForBox(cpFloat m, cpFloat width, cpFloat height);
 
+	cpCollisionHandler *cpSpaceAddCollisionHandler(cpSpace *space, cpCollisionType a, cpCollisionType b);
+	cpCollisionHandler *cpSpaceAddWildcardHandler(cpSpace *space, cpCollisionType type);
+	cpBool              cpSpaceAddPostStepCallback(cpSpace *space, cpPostStepFunc func, void *key, void *data);
+
+	void                cpArbiterGetBodies(const cpArbiter *arbiter, cpBody **a, cpBody **b);
+	void                cpArbiterGetShapes(const cpArbiter *arbiter, cpShape **a, cpShape **b);
+	cpBool              cpArbiterIsFirstContact(const cpArbiter *arbiter);
+	cpBool              cpArbiterIsRemoval(const cpArbiter *arbiter);
 ]]
 
 local Physics = {}
@@ -296,6 +353,30 @@ function Physics.Body:SetTorque(torque)
 	cp.cpBodySetTorque(self.cpBody, torque)
 end
 
+function Physics.Body:GetVelocity()
+	return cp.cpBodyGetVelocity(self.cpBody)
+end
+
+function Physics.Body:SetVelocity(vel_x, vel_y)
+	cp.cpBodySetVelocity(self.cpBody, {vel_x, vel_y})
+end
+
+function Physics.Body:GetForce()
+	return cp.cpBodyGetForce(self.cpBody)
+end
+
+function Physics.Body:SetForce(force_x, force_y)
+	cp.cpBodySetForce(self.cpBody, {force_x, force_y})
+end
+
+function Physics.Body:GetUserData()
+	return cp.cpBodyGetUserData(self.cpBody)
+end
+
+function Physics.Body:SetUserData(userdata)
+	cp.cpBodySetUserData(self.cpBody, userdata)
+end
+
 function Physics.Body:AddToSpace(space)
 	cp.cpSpaceAddBody(space.cpSpace, self.cpBody)
 	self.space = space
@@ -385,7 +466,7 @@ function Physics.Shape:GetSensor()
 end
 
 function Physics.Shape:SetSensor(sensor)
-	cp.ShapeSetSensor(self.cpShape, sensor)
+	cp.cpShapeSetSensor(self.cpShape, sensor)
 end
 
 function Physics.Shape:GetFriction()
@@ -394,6 +475,22 @@ end
 
 function Physics.Shape:SetFriction(friction)
 	cp.cpShapeSetFriction(self.cpShape, friction)
+end
+
+function Physics.Shape:GetCollisionType()
+	return cp.cpShapeGetCollisionType(self.cpShape)
+end
+
+function Physics.Shape:SetCollisionType(col_type)
+	cp.cpShapeSetCollisionType(self.cpShape, col_type)
+end
+
+function Physics.Shape:GetFilter()
+	return cp.cpShapeGetFilter(self.cpShape)
+end
+
+function Physics.Shape:SetFilter(filter)
+	cp.cpShapeSetFilter(self.cpShape, filter)
 end
 
 -- Physics.Constraint
@@ -414,6 +511,109 @@ end
 
 function Physics.Constraint:SetPinJointDistance(distance)
 	cp.cpPinJointSetDist(self.cpConstraint, distance)
+end
+
+-- Physics.Handler
+Physics.Handler = {}
+Physics.Handler.__index = Physics.Handler
+
+-- cpCollisionPreSolveFunc
+-- cpCollisionBeginFunc
+-- cpCollisionPostSolveFunc
+-- cpCollisionSeparateFunc
+
+function Physics.Handler.Add(space, type_a, type_b, begin, pre, post, sep)
+	cbegin = ffi.new("cpCollisionBeginFunc",     begin)
+	cpre   = ffi.new("cpCollisionPreSolveFunc",  pre)
+	cpost  = ffi.new("cpCollisionPostSolveFunc", post)
+	csep   = ffi.new("cpCollisionSeparateFunc",  sep)
+	handler = cp.cpSpaceAddCollisionHandler(space.cpSpace, type_a, type_b)
+	handler.beginFunc     = cbegin
+	handler.preSolveFunc  = cpre
+	handler.postSolveFunc = cpost
+	handler.seperateFunc  = csep
+end
+
+function Physics.Handler.AddWildcard(space, type_a, begin, pre, post, sep)
+	--begin = sep
+	--pre = sep
+	--post = sep
+	--cbegin = ffi.new("cpCollisionBeginFunc",     begin)
+	--cpre   = ffi.new("cpCollisionPreSolveFunc",  pre)
+	--cpost  = ffi.new("cpCollisionPostSolveFunc", post)
+	--csep   = ffi.new("cpCollisionSeparateFunc",  sep)
+	--handler = cp.cpSpaceAddWildcardHandler(space.cpSpace, type_a)
+	local handler = ffi.new("cpCollisionHandler *", cp.cpSpaceAddWildcardHandler(space.cpSpace, type_a))
+	print(string.format("%x", tonumber(ffi.cast("unsigned long long", handler))))
+	local beginFuncAddress = ffi.cast("unsigned long long", 
+		(handler + ffi.offsetof("cpCollisionHandler", "beginFunc"))
+	)
+	--ffi.cast("cpCollisionBeginFunc *", beginFuncAddress)[0] = ffi.new("cpCollisionBeginFunc", sep)
+	
+	print("offsetof beginFunc - " .. tostring(ffi.offsetof("cpCollisionHandler", "beginFunc")))
+
+	local handlerBeginFunc = ffi.cast("cpCollisionBeginFunc *", ffi.cast("uintptr_t", handler) + ffi.offsetof("cpCollisionHandler", "beginFunc"))
+	handlerBeginFunc[0] = begin
+
+	print(string.format("beginFunc address %x", tonumber(ffi.cast("uintptr_t", handler) + ffi.offsetof("cpCollisionHandler", "beginFunc"))))
+	--print(string.format("beginFunc address - %x", tonumber(beginFuncAddress)))
+	--handler.beginFunc     = sep
+	--handler.preSolveFunc  = pre
+	--handler.postSolveFunc = post
+	--handler.seperateFunc  = sep
+end
+
+function Physics.Handler.AddPostStep(cpSpace, func, key, data)
+	cp.cpSpaceAddPostStepCallback(cpSpace, func, key, data)
+end
+
+-- Physics.Arbiter
+Physics.Arbiter = {}
+Physics.Arbiter.__index = Physics.Arbiter
+
+function Physics.Arbiter.Create(arb_cdata)
+	return setmetatable({cpArbiter = arb_cdata}, Physics.Arbiter)
+end
+
+function Physics.Arbiter:GetBodies()
+	local body_a = setmetatable({}, Physics.Body)
+	local body_b = setmetatable({}, Physics.Body)
+
+	local body_a_ptr = ffi.new("cpBody *[1]", nil)
+	local body_b_ptr = ffi.new("cpBody *[1]", nil)
+
+	cp.cpArbiterGetBodies(self.cpArbiter, body_a_ptr, body_b_ptr)
+	body_a.cpBody = body_a_ptr[0]
+	body_b.cpBody = body_b_ptr[0]
+	--PrintAddress("BA1", body_a_ptr[0])
+	--PrintAddress("BA2", body_a.cpBody)
+	return body_a, body_b
+end
+
+function Physics.Arbiter:GetShapes()
+	local shape_a = setmetatable({}, Physics.Shape)
+	local shape_b = setmetatable({}, Physics.Shape)
+
+	local shape_a_ptr = ffi.new("cpShape *[1]", nil)
+	local shape_b_ptr = ffi.new("cpShape *[1]", nil)
+
+	cp.cpArbiterGetShapes(self.cpArbiter, shape_a_ptr, shape_b_ptr)
+	shape_a.cpShape = shape_a_ptr[0]
+	shape_b.cpShape = shape_b_ptr[0]
+	shape_a.body = setmetatable({cpBody = cp.cpShapeGetBody(shape_a.cpShape)}, Physics.Body)
+	shape_b.body = setmetatable({cpBody = cp.cpShapeGetBody(shape_b.cpShape)}, Physics.Body)
+	return shape_a, shape_b
+end
+
+--Physics.ObjectRefs = setmetatable({}, {__mode = "kv"})
+Physics.ObjectRefs = {}
+function Physics.ObjectRefs_Add(object)
+	local i = 1
+	while Physics.ObjectRefs[i] ~= nil do
+		i = i + 1
+	end
+	Physics.ObjectRefs[i] = object
+	return i
 end
 
 return Physics

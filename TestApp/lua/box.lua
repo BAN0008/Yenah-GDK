@@ -39,6 +39,7 @@ function Box:Draw()
 end
 
 function Box:Destroyed()
+	self.phys_shape:RemoveFromSpace()
 	self.phys_body:RemoveFromSpace()
 end
 

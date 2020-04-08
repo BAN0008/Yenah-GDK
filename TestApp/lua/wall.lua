@@ -39,6 +39,7 @@ function Wall:Draw()
 end
 
 function Wall:Destroyed()
+	self.phys_shape:RemoveFromSpace()
 	self.phys_body:RemoveFromSpace()
 end
 

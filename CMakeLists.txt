@@ -44,14 +44,50 @@ target_include_directories(Yenah PRIVATE "vendor/stb_image/include")
 target_include_directories(Yenah PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/lua")
 target_include_directories(Yenah PRIVATE "vendor/chipmunk/include")
 
+function(embed_text_file)
+	set(in_path "${ARGV0}")
+	set(out_path "${ARGV1}")
+	
+	get_filename_component(in_fname "${in_path}" NAME)
+	string(REGEX REPLACE "[^A-Za-z0-9]" "_" var_name "${in_fname}")
+	set(max_part_length 1000)
+	file(REMOVE "${out_path}")
+	file(READ "${in_path}" file_string)
+	string(LENGTH "${file_string}" file_length)
+	math(EXPR part_count "${file_length} / ${max_part_length}")
+	set(length_addition_string "")
+	set(concat_string "")
+	file(APPEND "${out_path}" "#include <cstring>\n\n")
+	foreach(i RANGE ${part_count})
+		math(EXPR part_index "${i} * ${max_part_length}")
+		string(SUBSTRING "${file_string}" ${part_index} ${max_part_length} part_string)
+		file(APPEND "${out_path}" "const char ${var_name}_p${i}[] = R\"(${part_string})\";\n\n")
+		string(CONCAT length_addition_string "${length_addition_string}" "length += strlen(${var_name}_p${i});\n\t")
+		if(${i} GREATER 0)
+			string(CONCAT concat_string "${concat_string}" "strcat(string, ${var_name}_p${i});\n\t")
+		else()
+			string(CONCAT concat_string "${concat_string}" "strcpy(string, ${var_name}_p${i});\n\t")
+		endif()
+	endforeach(i)
+	file(APPEND "${out_path}" "char *${var_name}()\n\
+{\n\
+	size_t length = 0;\n\
+	${length_addition_string}\n\
+	char *string = new char[length + ${part_count}];\n\
+	${concat_string}\n\
+	return string;\n\
+}")
+endfunction(embed_text_file)
+
 file(READ "src/lua/main.lua" main_lua)
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lua/main_lua.h" "const char main_lua_code[] = R\"(${main_lua})\";")
 
 file(READ "src/lua/object.lua" object_lua)
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lua/object_lua.h" "const char object_lua_code[] = R\"(${object_lua})\";")
 
-file(READ "src/lua/physics.lua" physics_lua)
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lua/physics_lua.h" "const char physics_lua_code[] = R\"(${physics_lua})\";")
+#file(READ "src/lua/physics.lua" physics_lua)
+#file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lua/physics_lua.h" "const char physics_lua_code[] = R\"(${physics_lua})\";")
+embed_text_file("src/lua/physics.lua" "${CMAKE_CURRENT_BINARY_DIR}/lua/physics_lua.h")
 
 file(READ "src/lua/vector.lua" vector_lua)
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/lua/vector_lua.h" "const char vector_lua_code[] = R\"(${vector_lua})\";")
